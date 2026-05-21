@@ -51,8 +51,7 @@ public abstract class BaseScreen extends ScreenAdapter {
         batch = new SpriteBatch();
         shapeRenderer = new ShapeRenderer();
 
-        // Используем мировые координаты (фиксированные)
-        scale = 1f; // Не используем масштаб, так как FitViewport уже масштабирует
+        scale = 1f;
 
         backgroundTexture = new Texture(getBackgroundPath());
         backgroundTexture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
@@ -62,7 +61,6 @@ public abstract class BaseScreen extends ScreenAdapter {
             characterTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
         }
 
-        // Панели создаются с мировыми координатами
         bottomPanel = new BottomPanel(WORLD_WIDTH, WORLD_HEIGHT, 1f);
         topPanel = new TopPanel(WORLD_WIDTH, WORLD_HEIGHT, 1f, this);
 
