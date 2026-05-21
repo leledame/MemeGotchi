@@ -12,7 +12,7 @@ import com.memegotchi.game.engine.PetEngine;
 import com.badlogic.gdx.graphics.Color;
 
 public class FishingScreen extends BaseScreen {
-    private static final float SIZE_MULTIPLIER = 8.0f;
+    private static final float SIZE_MULTIPLIER = 10.0f;
 
     private Texture gameFishingBackgroundTexture;
     private Texture fishTexture;
@@ -153,16 +153,24 @@ public class FishingScreen extends BaseScreen {
         }
         holdTimer = MathUtils.clamp(holdTimer, 0, REQUIRED_HOLD_TIME);
 
+        // Отрисовка левой зеленой зоны (поплавка)
         float zoneWidth = columnWidth * 0.45f;
         batch.draw(greenZoneTexture, firstColumnCenterX - (zoneWidth / 2f), zoneY, zoneWidth, zoneHeight);
 
+        // Отрисовка рыбы
         float fishW = fishTexture.getWidth() * baseScale;
         float fishH = fishTexture.getHeight() * baseScale;
         batch.draw(fishTexture, firstColumnCenterX - (fishW / 2f), fishY - (fishH / 2f), fishW, fishH);
 
-        float progressH = (holdTimer / REQUIRED_HOLD_TIME) * mgDrawHeight;
-        float barWidth = columnWidth * 0.4f;
-        batch.draw(greenZoneTexture, secondColumnCenterX - (barWidth / 2f), mgY, barWidth, progressH);
+        // Отрисовка правой зеленой зоны (шкалы прогресса)
+        float barMaxHeight = frameTopY - frameBottomY;
+        float progressH = (holdTimer / REQUIRED_HOLD_TIME) * barMaxHeight;
+
+        // Ширина шкалы строго равна ширине зеленой зоны (поплавка)
+        float barWidth = zoneWidth;
+
+        // Рисуем шкалу
+        batch.draw(greenZoneTexture, secondColumnCenterX - (barWidth / 2f), frameBottomY, barWidth, progressH);
 
         // Показываем прогресс
         promptFont.setColor(Color.YELLOW);
@@ -214,16 +222,30 @@ public class FishingScreen extends BaseScreen {
         float mgY = (GameResources.SCREEN_HEIGHT - mgDrawHeight) / 2f;
 
         columnWidth = mgDrawWidth / 3.0f;
-        firstColumnCenterX = mgX + columnWidth + (columnWidth * 0.4f);
-        secondColumnCenterX = mgX + (columnWidth * 2) + (columnWidth * 0.2f);
 
-        frameBottomY = mgY;
-        frameTopY = mgY + mgDrawHeight;
+        // Сдвиг рыбы и левой зеленой зоны
+        float fishOffsetX = -26f;
+        firstColumnCenterX = mgX + columnWidth + (columnWidth * 0.4f) + fishOffsetX;
+
+        // --- ИЗМЕНЕНИЯ ЗДЕСЬ ---
+        // Было -80f, прибавили 7 пикселей вправо, стало -73f.
+        // Если ты имел в виду 7 пикселей самой текстуры (с учетом масштаба),
+        // замени значение ниже на: -80f + (7f * baseScale);
+        float progressOffsetX = -80f;
+        secondColumnCenterX = mgX + (columnWidth * 2) + (columnWidth * 0.2f) + progressOffsetX;
+
+        // Настройка границ по оси Y
+        float bottomBoundaryOffsetY = 42f;
+        frameBottomY = mgY + bottomBoundaryOffsetY;
+
+        float topBoundaryOffsetY = -20f;
+        frameTopY = mgY + mgDrawHeight + topBoundaryOffsetY;
+
         zoneHeight = greenZoneTexture.getHeight() * baseScale;
 
         zoneY = frameBottomY;
-        fishY = (frameBottomY + frameTopY) / 2f;
-
+        float fishHalfHeight = (fishTexture.getHeight() * baseScale) / 2f;
+        fishY = frameBottomY + fishHalfHeight;
         generateNewFishTarget();
     }
 
