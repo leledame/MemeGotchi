@@ -1,9 +1,8 @@
-package com.memegotchi.game.panels;
+package com.memegotchi.game.buttons;
 
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.memegotchi.game.GameResources;
-import com.memegotchi.game.buttons.Button;
+import com.memegotchi.game.panels.TopPanel;
 
 public class TopButton extends Button {
     private TopPanel.TopMenuType menu;

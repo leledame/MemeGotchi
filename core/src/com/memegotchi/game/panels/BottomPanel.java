@@ -3,13 +3,11 @@ package com.memegotchi.game.panels;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.memegotchi.game.GameResources;
 import com.memegotchi.game.buttons.BottomPanelButton;
 
 public class BottomPanel extends Panel {
     private static final int BUTTON_COUNT = 5;
     private static final float BORDER_SCALE = 18f;
-    private static final float BUTTON_SIZE_RATIO = 0.6f; // кнопка = 60% высоты панели
     private static final float KITCHEN_SCALE = 1.50f;
 
     private BottomPanelButton[] buttons;
@@ -21,6 +19,12 @@ public class BottomPanel extends Panel {
     }
 
     private void initializeButtons() {
+        if (buttons != null) {
+            for (BottomPanelButton button : buttons) {
+                if (button != null) button.dispose();
+            }
+        }
+
         buttons = new BottomPanelButton[BUTTON_COUNT];
         BottomPanelButton.LocationType[] locations = {
                 BottomPanelButton.LocationType.LIVING,
@@ -30,8 +34,7 @@ public class BottomPanel extends Panel {
                 BottomPanelButton.LocationType.BEDROOM
         };
 
-        // Масштабируем размер кнопки под реальный экран
-        int buttonSize = (int) (panelHeight * 0.6f); // 60% от высоты панели, не зависит от scale
+        int buttonSize = (int) (panelHeight * 0.6f);
         int slotWidth = screenWidth / BUTTON_COUNT;
         int buttonY = panelY + (panelHeight - buttonSize) / 2;
 
@@ -51,16 +54,20 @@ public class BottomPanel extends Panel {
         shapeRenderer.setProjectionMatrix(batch.getProjectionMatrix());
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
+        // Светлый контур
         shapeRenderer.setColor(1f, 0.8f, 0.835f, 1f);
         shapeRenderer.rect(0, panelY, screenWidth, panelHeight);
 
+        // Тёмная панель
         shapeRenderer.setColor(0.8f, 0.56f, 0.58f, 1f);
-        shapeRenderer.rect(0, panelY, screenWidth, panelHeight - border);
+        shapeRenderer.rect(0, panelY + border, screenWidth, panelHeight - border);
+
 
         shapeRenderer.end();
 
         batch.begin();
         for (int i = 0; i < buttons.length; i++) {
+            if (buttons[i] == null) continue;
             if (buttons[i].getLocation() == BottomPanelButton.LocationType.KITCHEN) {
                 renderScaledButton(batch, buttons[i], i == activeButtonIndex);
             } else {
@@ -83,9 +90,8 @@ public class BottomPanel extends Panel {
     }
 
     public boolean handleTouch(int touchX, int touchY) {
-        boolean changed = false;
         for (int i = 0; i < buttons.length; i++) {
-            if (!buttons[i].isAvailable()) continue;
+            if (buttons[i] == null || !buttons[i].isAvailable()) continue;
 
             if (buttons[i].getLocation() == BottomPanelButton.LocationType.KITCHEN) {
                 int scaledWidth = (int) (buttons[i].getWidth() * KITCHEN_SCALE);
@@ -98,16 +104,14 @@ public class BottomPanel extends Panel {
                 if (touchX >= hitX && touchX <= hitX + scaledWidth &&
                         touchY >= hitY && touchY <= hitY + scaledHeight) {
                     setActiveButton(i);
-                    changed = true;
-                    break;
+                    return true;
                 }
             } else if (buttons[i].contains(touchX, touchY)) {
                 setActiveButton(i);
-                changed = true;
-                break;
+                return true;
             }
         }
-        return changed;
+        return false;
     }
 
     public void setActiveButton(int index) {
@@ -116,35 +120,43 @@ public class BottomPanel extends Panel {
         }
     }
 
-    /**
-     * Устанавливает активную кнопку по типу локации.
-     * Используется для синхронизации при смене экрана.
-     */
     public void setActiveLocation(BottomPanelButton.LocationType location) {
         for (int i = 0; i < buttons.length; i++) {
-            if (buttons[i].getLocation() == location) {
+            if (buttons[i] != null && buttons[i].getLocation() == location) {
                 activeButtonIndex = i;
                 return;
             }
         }
     }
 
-    public int getActiveButtonIndex() {
-        return activeButtonIndex;
-    }
-
     public BottomPanelButton.LocationType getActiveLocation() {
-        return buttons[activeButtonIndex].getLocation();
+        if (buttons[activeButtonIndex] != null) {
+            return buttons[activeButtonIndex].getLocation();
+        }
+        return BottomPanelButton.LocationType.LIVING;
     }
 
     public void setWalkAvailable(boolean available) {
-        buttons[1].setAvailable(available); // индекс 1 = WALK
+        if (buttons[1] != null) {
+            buttons[1].setAvailable(available);
+        }
+    }
+
+    public void resize(int width, int height, float scale) {
+        this.screenWidth = width;
+        this.screenHeight = height;
+        this.scale = scale;
+        this.panelHeight = (int) (screenHeight * PANEL_SIZE_PERCENT);
+        this.panelY = 0;
+        initializeButtons();
     }
 
     @Override
     public void dispose() {
-        for (BottomPanelButton button : buttons) {
-            button.dispose();
+        if (buttons != null) {
+            for (BottomPanelButton button : buttons) {
+                if (button != null) button.dispose();
+            }
         }
     }
 }

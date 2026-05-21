@@ -1,17 +1,15 @@
 package com.memegotchi.game.screens;
 
+import static com.badlogic.gdx.graphics.g3d.particles.ParticleShader.Setters.screenWidth;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.memegotchi.game.GameResources;
+import com.memegotchi.game.engine.PetEngine;
+import com.badlogic.gdx.graphics.Color;
 
 public class FishingScreen extends BaseScreen {
     private static final float SIZE_MULTIPLIER = 8.0f;
@@ -19,9 +17,9 @@ public class FishingScreen extends BaseScreen {
     private Texture gameFishingBackgroundTexture;
     private Texture fishTexture;
     private Texture greenZoneTexture;
-    private TextButton startGameButton;
 
     private boolean isFishingStarted = false;
+    private boolean showStartPrompt = true;
     private float holdTimer = 0f;
     private static final float REQUIRED_HOLD_TIME = 10.0f;
 
@@ -43,6 +41,12 @@ public class FishingScreen extends BaseScreen {
     private long fishMoveStartTime;
     private float fishMoveDuration;
     private static final float MAX_FISH_SPEED = 2400f;
+
+    private BitmapFont promptFont;
+
+    public FishingScreen(PetEngine petEngine) {
+        super(petEngine);
+    }
 
     @Override
     public String getBackgroundPath() {
@@ -68,44 +72,20 @@ public class FishingScreen extends BaseScreen {
     protected void onScreenShow() {
         super.onScreenShow();
         isFishingStarted = false;
+        showStartPrompt = true;
         holdTimer = 0f;
+        zoneSpeed = 0f;
 
-        gameFishingBackgroundTexture = new Texture("backgronds/fishing/gamefish.png");
-        fishTexture = new Texture("backgronds/fishing/fish_for_game.png");
-        greenZoneTexture = new Texture("backgronds/fishing/green_zone.png");
+        promptFont = new BitmapFont();
+        promptFont.getData().setScale(2f);
+
+        gameFishingBackgroundTexture = new Texture(GameResources.FISHING_MINIGAME_BG);
+        fishTexture = new Texture(GameResources.FISHING_FISH);
+        greenZoneTexture = new Texture(GameResources.FISHING_ZONE);
 
         gameFishingBackgroundTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
         fishTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
         greenZoneTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
-
-        try {
-            Texture buttonTexture = new Texture("buttons/text_button/button.png");
-            buttonTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
-
-            TextButtonStyle startStyle = new TextButtonStyle();
-            startStyle.up = new TextureRegionDrawable(new TextureRegion(buttonTexture));
-            startStyle.down = startStyle.up;
-            startStyle.font = font;
-
-            startGameButton = new TextButton("Start", startStyle);
-        } catch (Exception e) {
-            TextButtonStyle startStyle = new TextButtonStyle();
-            startStyle.font = font;
-            startGameButton = new TextButton("Start", startStyle);
-        }
-
-        startGameButton.pack();
-        startGameButton.setTransform(true);
-        startGameButton.setScale(2.5f);
-        startGameButton.setPosition(screenWidth / 2f - startGameButton.getWidth() * 1.25f, 250);
-        startGameButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                isFishingStarted = true;
-                startGameButton.setVisible(false);
-            }
-        });
-        stage.addActor(startGameButton);
 
         calculateLayout();
     }
@@ -114,25 +94,39 @@ public class FishingScreen extends BaseScreen {
     public void render(float delta) {
         super.render(delta);
 
-        updateZonePhysics();
-
         boolean catIsHere = screenManager != null
                 && screenManager.getCurrentCatRoom() == getCatRoomState();
 
-        if (!isFishingStarted) {
-            startGameButton.setVisible(catIsHere);
-        }
-        moveButton.setVisible(!catIsHere);
+        if (!catIsHere) return;
+
+        updateZonePhysics();
 
         if (!isFishingStarted) {
+            batch.begin();
+            promptFont.setColor(Color.WHITE);
+            String promptText = showStartPrompt ? "🐟 TAP TO START FISHING! 🐟" : "🏆 CATCH THE FISH IN GREEN ZONE! 🏆";
+            float textWidth = promptFont.getRegion().getRegionWidth() * promptFont.getData().scaleX * promptText.length() / 2;
+            promptFont.draw(batch, promptText, GameResources.SCREEN_WIDTH / 2f - textWidth / 2, GameResources.SCREEN_HEIGHT / 2f + 200);
+            batch.end();
+
+            if (Gdx.input.justTouched()) {
+                if (showStartPrompt) {
+                    showStartPrompt = false;
+                } else {
+                    isFishingStarted = true;
+                    holdTimer = 0f;
+                    zoneY = frameBottomY;
+                    zoneSpeed = 0f;
+                }
+            }
             return;
         }
 
         float baseScale = scale * SIZE_MULTIPLIER;
         float mgDrawWidth = gameFishingBackgroundTexture.getWidth() * baseScale;
         float mgDrawHeight = gameFishingBackgroundTexture.getHeight() * baseScale;
-        float mgX = (screenWidth - mgDrawWidth) / 2f;
-        float mgY = (screenHeight - mgDrawHeight) / 2f;
+        float mgX = (GameResources.SCREEN_WIDTH - mgDrawWidth) / 2f;
+        float mgY = (GameResources.SCREEN_HEIGHT - mgDrawHeight) / 2f;
 
         batch.begin();
         batch.draw(gameFishingBackgroundTexture, mgX, mgY, mgDrawWidth, mgDrawHeight);
@@ -170,27 +164,34 @@ public class FishingScreen extends BaseScreen {
         float barWidth = columnWidth * 0.4f;
         batch.draw(greenZoneTexture, secondColumnCenterX - (barWidth / 2f), mgY, barWidth, progressH);
 
+        // Показываем прогресс
+        promptFont.setColor(Color.YELLOW);
+        String progressText = String.format("HOLD: %.0f%%", (holdTimer / REQUIRED_HOLD_TIME) * 100);
+        float textWidth = promptFont.getRegion().getRegionWidth() * promptFont.getData().scaleX * progressText.length() / 2;
+        promptFont.draw(batch, progressText, GameResources.SCREEN_WIDTH / 2f - textWidth / 2, mgY - 20);
+
         batch.end();
 
         if (holdTimer >= REQUIRED_HOLD_TIME) {
             isFishingStarted = false;
-            holdTimer = 0;
+            showStartPrompt = true;
+            holdTimer = 0f;
+            if (petEngine != null) {
+                petEngine.getPet().setCoins(petEngine.getPet().getCoins() + 20);
+                petEngine.getPet().setHappiness(Math.min(100, petEngine.getPet().getHappiness() + 10));
+            }
         }
-    }
-
-    @Override
-    protected void handleInput() {
-        super.handleInput();
     }
 
     private void updateZonePhysics() {
         if (isFishingStarted) {
-            float dt = Gdx.graphics.getDeltaTime();
+            float dt = Math.min(Gdx.graphics.getDeltaTime(), 0.033f);
             if (Gdx.input.isTouched()) {
                 zoneSpeed += (ZONE_SPEED_UP - ZONE_GRAVITY) * dt;
             } else {
                 zoneSpeed -= ZONE_GRAVITY * dt;
             }
+            zoneSpeed = MathUtils.clamp(zoneSpeed, -2000f, 2000f);
             zoneY += zoneSpeed * dt;
 
             if (zoneY < frameBottomY) {
@@ -209,8 +210,8 @@ public class FishingScreen extends BaseScreen {
 
         float mgDrawWidth = gameFishingBackgroundTexture.getWidth() * baseScale;
         float mgDrawHeight = gameFishingBackgroundTexture.getHeight() * baseScale;
-        float mgX = (screenWidth - mgDrawWidth) / 2f;
-        float mgY = (screenHeight - mgDrawHeight) / 2f;
+        float mgX = (GameResources.SCREEN_WIDTH - mgDrawWidth) / 2f;
+        float mgY = (GameResources.SCREEN_HEIGHT - mgDrawHeight) / 2f;
 
         columnWidth = mgDrawWidth / 3.0f;
         firstColumnCenterX = mgX + columnWidth + (columnWidth * 0.4f);
@@ -243,6 +244,7 @@ public class FishingScreen extends BaseScreen {
         if (gameFishingBackgroundTexture != null) gameFishingBackgroundTexture.dispose();
         if (fishTexture != null) fishTexture.dispose();
         if (greenZoneTexture != null) greenZoneTexture.dispose();
+        if (promptFont != null) promptFont.dispose();
         super.dispose();
     }
 }

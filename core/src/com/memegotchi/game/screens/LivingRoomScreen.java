@@ -1,8 +1,12 @@
 package com.memegotchi.game.screens;
 
 import com.memegotchi.game.GameResources;
+import com.memegotchi.game.engine.PetEngine;
 
 public class LivingRoomScreen extends BaseScreen {
+    public LivingRoomScreen(PetEngine petEngine) {
+        super(petEngine);
+    }
     @Override
     public String getBackgroundPath() {
         return GameResources.BACKGROUND_DAY;
@@ -17,7 +21,6 @@ public class LivingRoomScreen extends BaseScreen {
     public boolean shouldDrawCharacter() {
         return true;
     }
-
     @Override
     public CatRoomState getCatRoomState() {
         return CatRoomState.LIVING;
