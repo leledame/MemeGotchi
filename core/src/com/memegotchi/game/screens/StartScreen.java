@@ -37,7 +37,6 @@ public class StartScreen extends ScreenAdapter {
 
         int centerX = (GameResources.SCREEN_WIDTH - 400) / 2;
 
-        // Убираем дублирующий setText, текст уже передан в конструктор
         startButton = new Button(centerX, 600, 400, 120, buttonFont, GameResources.BUTTON_TEXT, "START");
     }
 
