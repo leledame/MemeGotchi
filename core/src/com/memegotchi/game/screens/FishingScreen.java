@@ -1,25 +1,31 @@
 package com.memegotchi.game.screens;
 
-import static com.badlogic.gdx.graphics.g3d.particles.ParticleShader.Setters.screenWidth;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.memegotchi.game.GameResources;
+import com.memegotchi.game.MemeGotchi;
 import com.memegotchi.game.engine.PetEngine;
-import com.badlogic.gdx.graphics.Color;
 
 public class FishingScreen extends BaseScreen {
-    private static final float SIZE_MULTIPLIER = 10.0f;
+    private static final float SIZE_MULTIPLIER = 5.0f;
 
     private Texture gameFishingBackgroundTexture;
     private Texture fishTexture;
     private Texture greenZoneTexture;
+    private TextButton startGameButton;
+    private Stage uiStage;
 
     private boolean isFishingStarted = false;
-    private boolean showStartPrompt = true;
     private float holdTimer = 0f;
     private static final float REQUIRED_HOLD_TIME = 10.0f;
 
@@ -42,7 +48,7 @@ public class FishingScreen extends BaseScreen {
     private float fishMoveDuration;
     private static final float MAX_FISH_SPEED = 2400f;
 
-    private BitmapFont promptFont;
+    private BitmapFont buttonFont;
 
     public FishingScreen(PetEngine petEngine) {
         super(petEngine);
@@ -72,55 +78,76 @@ public class FishingScreen extends BaseScreen {
     protected void onScreenShow() {
         super.onScreenShow();
         isFishingStarted = false;
-        showStartPrompt = true;
         holdTimer = 0f;
-        zoneSpeed = 0f;
 
-        promptFont = new BitmapFont();
-        promptFont.getData().setScale(2f);
+        buttonFont = new BitmapFont();
+        buttonFont.getData().setScale(1.5f);
 
-        gameFishingBackgroundTexture = new Texture(GameResources.FISHING_MINIGAME_BG);
-        fishTexture = new Texture(GameResources.FISHING_FISH);
-        greenZoneTexture = new Texture(GameResources.FISHING_ZONE);
+        gameFishingBackgroundTexture = new Texture("backgronds/fishing/gamefish.png");
+        fishTexture = new Texture("backgronds/fishing/fish_for_game.png");
+        greenZoneTexture = new Texture("backgronds/fishing/green_zone.png");
 
         gameFishingBackgroundTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
         fishTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
         greenZoneTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+
+        // Создаём стиль для кнопки
+        TextButtonStyle startStyle = new TextButtonStyle();
+        try {
+            Texture buttonTexture = new Texture("buttons/text_button/button.png");
+            buttonTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+            startStyle.up = new TextureRegionDrawable(new TextureRegion(buttonTexture));
+            startStyle.down = startStyle.up;
+        } catch (Exception e) {
+            // Если текстуры нет, будет просто текст
+        }
+        startStyle.font = buttonFont;
+
+        startGameButton = new TextButton("START", startStyle);
+        startGameButton.setSize(280, 90); // фиксированный размер
+
+        // Позиционирование: по центру по горизонтали, Y = 550 (чуть ниже середины)
+        float btnX = (GameResources.SCREEN_WIDTH - startGameButton.getWidth()) / 2f;
+        float btnY = 400;
+        startGameButton.setPosition(btnX, btnY);
+
+        startGameButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                isFishingStarted = true;
+                startGameButton.setVisible(false);
+            }
+        });
+
+        // Создаём Stage, синхронизированный с камерой игры
+        if (screenManager instanceof MemeGotchi) {
+            MemeGotchi game = (MemeGotchi) screenManager;
+            uiStage = new Stage(new com.badlogic.gdx.utils.viewport.FitViewport(
+                    GameResources.SCREEN_WIDTH, GameResources.SCREEN_HEIGHT, game.camera));
+        } else {
+            uiStage = new Stage();
+        }
+        uiStage.addActor(startGameButton);
+        Gdx.input.setInputProcessor(uiStage);
 
         calculateLayout();
     }
 
     @Override
     public void render(float delta) {
-        super.render(delta);
+        super.render(delta); // рисует фон, персонажа, статы
 
-        boolean catIsHere = screenManager != null
-                && screenManager.getCurrentCatRoom() == getCatRoomState();
-
-        if (!catIsHere) return;
-
-        updateZonePhysics();
+        // Отрисовываем UI-слой (кнопку), только если игра не началась
+        if (uiStage != null && !isFishingStarted) {
+            uiStage.act(delta);
+            uiStage.draw();
+        }
 
         if (!isFishingStarted) {
-            batch.begin();
-            promptFont.setColor(Color.WHITE);
-            String promptText = showStartPrompt ? "🐟 TAP TO START FISHING! 🐟" : "🏆 CATCH THE FISH IN GREEN ZONE! 🏆";
-            float textWidth = promptFont.getRegion().getRegionWidth() * promptFont.getData().scaleX * promptText.length() / 2;
-            promptFont.draw(batch, promptText, GameResources.SCREEN_WIDTH / 2f - textWidth / 2, GameResources.SCREEN_HEIGHT / 2f + 200);
-            batch.end();
-
-            if (Gdx.input.justTouched()) {
-                if (showStartPrompt) {
-                    showStartPrompt = false;
-                } else {
-                    isFishingStarted = true;
-                    holdTimer = 0f;
-                    zoneY = frameBottomY;
-                    zoneSpeed = 0f;
-                }
-            }
             return;
         }
+
+        updateZonePhysics();
 
         float baseScale = scale * SIZE_MULTIPLIER;
         float mgDrawWidth = gameFishingBackgroundTexture.getWidth() * baseScale;
@@ -153,53 +180,40 @@ public class FishingScreen extends BaseScreen {
         }
         holdTimer = MathUtils.clamp(holdTimer, 0, REQUIRED_HOLD_TIME);
 
-        // Отрисовка левой зеленой зоны (поплавка)
         float zoneWidth = columnWidth * 0.45f;
         batch.draw(greenZoneTexture, firstColumnCenterX - (zoneWidth / 2f), zoneY, zoneWidth, zoneHeight);
 
-        // Отрисовка рыбы
         float fishW = fishTexture.getWidth() * baseScale;
         float fishH = fishTexture.getHeight() * baseScale;
         batch.draw(fishTexture, firstColumnCenterX - (fishW / 2f), fishY - (fishH / 2f), fishW, fishH);
 
-        // Отрисовка правой зеленой зоны (шкалы прогресса)
         float barMaxHeight = frameTopY - frameBottomY;
         float progressH = (holdTimer / REQUIRED_HOLD_TIME) * barMaxHeight;
-
-        // Ширина шкалы строго равна ширине зеленой зоны (поплавка)
         float barWidth = zoneWidth;
-
-        // Рисуем шкалу
         batch.draw(greenZoneTexture, secondColumnCenterX - (barWidth / 2f), frameBottomY, barWidth, progressH);
-
-        // Показываем прогресс
-        promptFont.setColor(Color.YELLOW);
-        String progressText = String.format("HOLD: %.0f%%", (holdTimer / REQUIRED_HOLD_TIME) * 100);
-        float textWidth = promptFont.getRegion().getRegionWidth() * promptFont.getData().scaleX * progressText.length() / 2;
-        promptFont.draw(batch, progressText, GameResources.SCREEN_WIDTH / 2f - textWidth / 2, mgY - 20);
 
         batch.end();
 
         if (holdTimer >= REQUIRED_HOLD_TIME) {
             isFishingStarted = false;
-            showStartPrompt = true;
-            holdTimer = 0f;
+            holdTimer = 0;
             if (petEngine != null) {
-                petEngine.getPet().setCoins(petEngine.getPet().getCoins() + 20);
-                petEngine.getPet().setHappiness(Math.min(100, petEngine.getPet().getHappiness() + 10));
+                petEngine.getPet().setCoins(petEngine.getPet().getCoins() + 10);
+            }
+            if (screenManager != null) {
+                screenManager.backToPreviousScreen();
             }
         }
     }
 
     private void updateZonePhysics() {
         if (isFishingStarted) {
-            float dt = Math.min(Gdx.graphics.getDeltaTime(), 0.033f);
+            float dt = Gdx.graphics.getDeltaTime();
             if (Gdx.input.isTouched()) {
                 zoneSpeed += (ZONE_SPEED_UP - ZONE_GRAVITY) * dt;
             } else {
                 zoneSpeed -= ZONE_GRAVITY * dt;
             }
-            zoneSpeed = MathUtils.clamp(zoneSpeed, -2000f, 2000f);
             zoneY += zoneSpeed * dt;
 
             if (zoneY < frameBottomY) {
@@ -223,18 +237,12 @@ public class FishingScreen extends BaseScreen {
 
         columnWidth = mgDrawWidth / 3.0f;
 
-        // Сдвиг рыбы и левой зеленой зоны
         float fishOffsetX = -26f;
         firstColumnCenterX = mgX + columnWidth + (columnWidth * 0.4f) + fishOffsetX;
 
-        // --- ИЗМЕНЕНИЯ ЗДЕСЬ ---
-        // Было -80f, прибавили 7 пикселей вправо, стало -73f.
-        // Если ты имел в виду 7 пикселей самой текстуры (с учетом масштаба),
-        // замени значение ниже на: -80f + (7f * baseScale);
         float progressOffsetX = -80f;
         secondColumnCenterX = mgX + (columnWidth * 2) + (columnWidth * 0.2f) + progressOffsetX;
 
-        // Настройка границ по оси Y
         float bottomBoundaryOffsetY = 42f;
         frameBottomY = mgY + bottomBoundaryOffsetY;
 
@@ -262,11 +270,20 @@ public class FishingScreen extends BaseScreen {
     }
 
     @Override
+    public void hide() {
+        super.hide();
+        if (uiStage != null) {
+            Gdx.input.setInputProcessor(null);
+        }
+    }
+
+    @Override
     public void dispose() {
         if (gameFishingBackgroundTexture != null) gameFishingBackgroundTexture.dispose();
         if (fishTexture != null) fishTexture.dispose();
         if (greenZoneTexture != null) greenZoneTexture.dispose();
-        if (promptFont != null) promptFont.dispose();
+        if (buttonFont != null) buttonFont.dispose();
+        if (uiStage != null) uiStage.dispose();
         super.dispose();
     }
 }

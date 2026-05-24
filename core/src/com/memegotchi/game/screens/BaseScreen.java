@@ -7,6 +7,9 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Button;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.memegotchi.game.GameResources;
 import com.memegotchi.game.MemeGotchi;
@@ -21,6 +24,9 @@ public abstract class BaseScreen extends ScreenAdapter {
     protected Texture backgroundTexture;
     protected Texture characterTexture;
     protected float scale;
+    protected Stage stage;
+    protected TextButton moveButton;
+    protected BitmapFont font;
     protected BottomPanel bottomPanel;
     protected TopPanel topPanel;
     protected ScreenManager screenManager;
@@ -28,6 +34,7 @@ public abstract class BaseScreen extends ScreenAdapter {
 
     protected BitmapFont statsFont;
     protected BitmapFont coinsFont;
+    Button buttonPlay;
 
     private boolean wasTouched = false;
     protected static final float CHARACTER_SCALE = 15f;
@@ -50,6 +57,8 @@ public abstract class BaseScreen extends ScreenAdapter {
 
         batch = new SpriteBatch();
         shapeRenderer = new ShapeRenderer();
+
+
 
         // Используем мировые координаты (фиксированные)
         scale = 1f; // Не используем масштаб, так как FitViewport уже масштабирует
@@ -149,6 +158,9 @@ public abstract class BaseScreen extends ScreenAdapter {
                 if (screenManager != null) {
                     screenManager.switchToShop();
                 }
+            }
+            if (bottomPanel.handleTouch(touchX, touchY)) {
+                onBottomPanelLocationChanged(bottomPanel.getActiveLocation());
             }
 
             // Клик по персонажу для игры
