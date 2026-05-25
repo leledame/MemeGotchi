@@ -26,23 +26,23 @@ public class ShopScreen extends BaseScreen {
         super.show();
 
         buttonFont = new BitmapFont();
-        buttonFont.getData().setScale(1.5f);
+        buttonFont.getData().setScale(3.0f);
 
         titleFont = new BitmapFont();
-        titleFont.getData().setScale(2.5f);
+        titleFont.getData().setScale(3.0f);
 
         priceFont = new BitmapFont();
         priceFont.getData().setScale(1.8f);
 
-        int buttonWidth = 350;
-        int buttonHeight = 70;
+        int buttonWidth = 500;
+        int buttonHeight = 90;
         int centerX = (GameResources.SCREEN_WIDTH - buttonWidth) / 2;
-        int startY = GameResources.SCREEN_HEIGHT - 250;
+        int startY = GameResources.SCREEN_HEIGHT - 300;
 
-        backButton = new Button(30, GameResources.SCREEN_HEIGHT - 80, 100, 50, buttonFont, GameResources.BUTTON_TEXT, "Back");
+        backButton = new Button(25, GameResources.SCREEN_HEIGHT - 110, 280, 90, buttonFont, GameResources.BUTTON_TEXT, "BACK");
         buyFoodButton = new Button(centerX, startY, buttonWidth, buttonHeight, buttonFont, GameResources.BUTTON_TEXT, "🍕 Food (10💰)");
-        buyToyButton = new Button(centerX, startY - 90, buttonWidth, buttonHeight, buttonFont, GameResources.BUTTON_TEXT, "🎾 Toy (20💰)");
-        buyCleanButton = new Button(centerX, startY - 180, buttonWidth, buttonHeight, buttonFont, GameResources.BUTTON_TEXT, "🧼 Shampoo (15💰)");
+        buyToyButton = new Button(centerX, startY - 100, buttonWidth, buttonHeight, buttonFont, GameResources.BUTTON_TEXT, "🎾 Toy (20💰)");
+        buyCleanButton = new Button(centerX, startY - 200, buttonWidth, buttonHeight, buttonFont, GameResources.BUTTON_TEXT, "🧼 Shampoo (15💰)");
     }
 
     @Override
@@ -57,11 +57,11 @@ public class ShopScreen extends BaseScreen {
         }
 
         titleFont.setColor(Color.GOLD);
-        titleFont.draw(batch, "🛒 SHOP 🛒", GameResources.SCREEN_WIDTH / 2f - 100, GameResources.SCREEN_HEIGHT - 100);
+        titleFont.draw(batch, "🛒 SHOP 🛒", GameResources.SCREEN_WIDTH / 2f - 100, GameResources.SCREEN_HEIGHT - 130);
 
         priceFont.setColor(Color.GOLD);
         priceFont.draw(batch, "💰 " + petEngine.getPet().getCoins() + " coins",
-                GameResources.SCREEN_WIDTH / 2f - 80, GameResources.SCREEN_HEIGHT - 160);
+                GameResources.SCREEN_WIDTH / 2f - 80, GameResources.SCREEN_HEIGHT - 170);
 
         buyFoodButton.render(batch, false);
         buyToyButton.render(batch, false);

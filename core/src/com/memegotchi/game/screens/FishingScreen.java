@@ -108,7 +108,7 @@ public class FishingScreen extends BaseScreen {
 
         // Позиционирование: по центру по горизонтали, Y = 550 (чуть ниже середины)
         float btnX = (GameResources.SCREEN_WIDTH - startGameButton.getWidth()) / 2f;
-        float btnY = 400;
+        float btnY = 400 ;
         startGameButton.setPosition(btnX, btnY);
 
         startGameButton.addListener(new ClickListener() {
