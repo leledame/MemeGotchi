@@ -14,6 +14,9 @@ public class GameResources {
 
     // Персонаж
     public static final String CHARACTER_BASE = "charachters/female_cat/living_room/base.png";
+    public static final String CHARACTER_HAPPY = "charachters/female_cat/living_room/happy.png";
+    public static final String CHARACTER_SAD = "charachters/female_cat/living_room/sad.png";
+    public static final String CHARACTER_SLEEPY = "charachters/female_cat/living_room/sleepy.png";
 
     // Мини-игра
     public static final String FISHING_MINIGAME_BG = "backgronds/fishing/gamefish.png";

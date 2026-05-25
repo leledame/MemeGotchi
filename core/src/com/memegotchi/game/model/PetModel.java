@@ -1,8 +1,8 @@
 package com.memegotchi.game.model;
 
 public class PetModel {
-    private int hunger = 80;
-    private int happiness = 80;
+    private int hunger = 100;
+    private int happiness = 100;
     private int energy = 100;
     private int cleanliness = 100;
     private int coins = 100;

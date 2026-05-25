@@ -226,12 +226,15 @@ public class FishingScreen extends BaseScreen {
             }
         });
 
-        TextButton releaseButton = new TextButton("RELEASE", btnStyle);
-        releaseButton.setSize(200, 80);
-        releaseButton.setPosition(GameResources.SCREEN_WIDTH / 2f - 220, 260);
-        releaseButton.addListener(new ClickListener() {
+        TextButton eatButton = new TextButton("EAT", btnStyle);
+        eatButton.setSize(200, 80);
+        eatButton.setPosition(GameResources.SCREEN_WIDTH / 2f - 220, 260);
+        eatButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                if (petEngine != null) {
+                    petEngine.feed();
+                }
                 if (screenManager != null) {
                     screenManager.backToPreviousScreen();
                 }
@@ -241,7 +244,7 @@ public class FishingScreen extends BaseScreen {
         catchUiStage.addActor(catchMessageLabel);
         catchUiStage.addActor(caughtFishImage);
         catchUiStage.addActor(sellButton);
-        catchUiStage.addActor(releaseButton);
+        catchUiStage.addActor(eatButton);
     }
 
     @Override
@@ -254,7 +257,10 @@ public class FishingScreen extends BaseScreen {
             return;
         }
 
-        if (uiStage != null && !isFishingStarted) {
+        boolean catIsHere = screenManager != null
+                && screenManager.getCurrentCatRoom() == getCatRoomState();
+
+        if (catIsHere && !isFishingStarted && uiStage != null) {
             uiStage.act(delta);
             uiStage.draw();
         }

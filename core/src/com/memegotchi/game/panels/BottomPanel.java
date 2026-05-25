@@ -54,14 +54,13 @@ public class BottomPanel extends Panel {
         shapeRenderer.setProjectionMatrix(batch.getProjectionMatrix());
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
-        // Светлый контур
+        // Светлый контур (снизу)
         shapeRenderer.setColor(1f, 0.8f, 0.835f, 1f);
         shapeRenderer.rect(0, panelY, screenWidth, panelHeight);
 
-        // Тёмная панель
+        // Тёмная панель (сверху)
         shapeRenderer.setColor(0.8f, 0.56f, 0.58f, 1f);
-        shapeRenderer.rect(0, panelY + border, screenWidth, panelHeight - border);
-
+        shapeRenderer.rect(0, panelY, screenWidth, panelHeight - border);
 
         shapeRenderer.end();
 
