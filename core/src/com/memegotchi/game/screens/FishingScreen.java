@@ -237,16 +237,16 @@ public class FishingScreen extends BaseScreen {
 
         columnWidth = mgDrawWidth / 3.0f;
 
-        float fishOffsetX = -26f;
+        float fishOffsetX = -32f;
         firstColumnCenterX = mgX + columnWidth + (columnWidth * 0.4f) + fishOffsetX;
 
-        float progressOffsetX = -80f;
+        float progressOffsetX = -97f;
         secondColumnCenterX = mgX + (columnWidth * 2) + (columnWidth * 0.2f) + progressOffsetX;
 
-        float bottomBoundaryOffsetY = 42f;
+        float bottomBoundaryOffsetY = 54f;
         frameBottomY = mgY + bottomBoundaryOffsetY;
 
-        float topBoundaryOffsetY = -20f;
+        float topBoundaryOffsetY = -30f;
         frameTopY = mgY + mgDrawHeight + topBoundaryOffsetY;
 
         zoneHeight = greenZoneTexture.getHeight() * baseScale;
