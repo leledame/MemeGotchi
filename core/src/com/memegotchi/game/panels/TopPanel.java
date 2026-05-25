@@ -1,6 +1,7 @@
 package com.memegotchi.game.panels;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -16,7 +17,7 @@ public class TopPanel extends Panel {
     private static final float BORDER_SCALE = 18f;
     private TopButton shopButton;
     private TopButton settingsButton;
-    private ScreenManager screenManager;      // добавлено поле
+    private ScreenManager screenManager;
     private BitmapFont font;
     private BitmapFont timeFont;
 
@@ -26,10 +27,9 @@ public class TopPanel extends Panel {
 
     public enum TopMenuType { SHOP, SETTINGS }
 
-    // Конструктор теперь принимает ScreenManager
     public TopPanel(int screenWidth, int screenHeight, float scale, BaseScreen parent, ScreenManager sm) {
         super(screenWidth, screenHeight, scale, false);
-        this.screenManager = sm;               // сохраняем
+        this.screenManager = sm;
         initButtons();
         font = new BitmapFont();
         font.getData().setScale(1.5f);
@@ -100,9 +100,6 @@ public class TopPanel extends Panel {
         timeFont.setColor(Color.WHITE);
         timeFont.draw(batch, timeString, 15, screenHeight - 25);
 
-        // Иконка ✨
-        font.setColor(Color.BLACK);
-        font.draw(batch, "✨", 15 + timeFont.getRegion().getRegionWidth() * 1.2f, screenHeight - 25);
 
         // Кнопки
         if (shopButton != null) shopButton.render(batch, false);

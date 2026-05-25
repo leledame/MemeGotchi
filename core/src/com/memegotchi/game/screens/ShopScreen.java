@@ -121,20 +121,20 @@ public class ShopScreen extends BaseScreen {
 
                 }
 
-            // В методе handleInput() блока buyEnergyButton
-        } else if (buyEnergyButton.contains(x, y)) {
-            if (petEngine.getPet().getCoins() >= 15) {
-                if (petEngine.getPet().getEnergy() < 100) {
-                    petEngine.getPet().setCoins(petEngine.getPet().getCoins() - 15);
-                    petEngine.sleep();   // ← теперь энергия станет 100
-                    showMessage("Energy restored to 100%!");
+                // В методе handleInput() блока buyEnergyButton
+            } else if (buyEnergyButton.contains(x, y)) {
+                if (petEngine.getPet().getCoins() >= 15) {
+                    if (petEngine.getPet().getEnergy() < 100) {
+                        petEngine.getPet().setCoins(petEngine.getPet().getCoins() - 15);
+                        petEngine.sleep();   // ← теперь энергия станет 100
+                        showMessage("Energy restored to 100%!");
+                    } else {
+                        showMessage("Already full energy!");
+                    }
                 } else {
-                    showMessage("Already full energy!");
+                    showMessage("Not enough coins!");
                 }
-            } else {
-                showMessage("Not enough coins!");
             }
-        }
         }
     }
 

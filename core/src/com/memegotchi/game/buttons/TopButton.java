@@ -17,17 +17,28 @@ public class TopButton extends Button {
         String texturePath = GameResources.getTopButtonTexturePath(menu);
         String selectedPath = GameResources.getTopButtonSelectedTexturePath(menu);
 
-        if (texturePath != null) {
-            texture = new Texture(texturePath);
-            texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+        // Если для SETTINGS нет текстур, используем стандартную
+        if (menu == TopPanel.TopMenuType.SETTINGS && texturePath == null) {
+            texturePath = "buttons/settings.png";
+            selectedPath = "buttons/settings.png";
         }
 
-        if (selectedPath != null) {
-            selectedTexture = new Texture(selectedPath);
-            selectedTexture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+        try {
+            if (texturePath != null) {
+                texture = new Texture(texturePath);
+                texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+            }
+            if (selectedPath != null && !selectedPath.equals(texturePath)) {
+                selectedTexture = new Texture(selectedPath);
+                selectedTexture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+            } else if (texture != null) {
+                selectedTexture = texture;
+            }
+        } catch (Exception e) {
+            texture = null;
+            selectedTexture = null;
         }
     }
-
     public TopPanel.TopMenuType getMenu() {
         return menu;
     }

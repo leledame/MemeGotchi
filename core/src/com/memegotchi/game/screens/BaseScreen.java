@@ -25,7 +25,9 @@ public abstract class BaseScreen extends ScreenAdapter {
     protected SpriteBatch batch;
     protected ShapeRenderer shapeRenderer;
     protected Texture backgroundTexture;
-    protected Texture characterTexture;
+    protected Texture currentCharacterTexture;   // текущая эмоция
+    private Texture baseTexture, happyTexture, sadTexture, sleepyTexture; // текстуры эмоций
+
     protected float scale;
     protected Stage stage;
     protected TextButton moveButton;
@@ -44,7 +46,7 @@ public abstract class BaseScreen extends ScreenAdapter {
     protected static final int WORLD_WIDTH = GameResources.SCREEN_WIDTH;
     protected static final int WORLD_HEIGHT = GameResources.SCREEN_HEIGHT;
 
-    // Массив всех возможных локаций для переключения по кругу
+    // Локации для кнопки MOVE
     private static final BottomPanelButton.LocationType[] LOCATIONS = {
             BottomPanelButton.LocationType.LIVING,
             BottomPanelButton.LocationType.BEDROOM,
@@ -78,12 +80,18 @@ public abstract class BaseScreen extends ScreenAdapter {
         backgroundTexture = new Texture(getBackgroundPath());
         backgroundTexture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
 
-        if (shouldDrawCharacter()) {
-            characterTexture = new Texture(getCharacterPath());
-            characterTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
-        }
+        // Загрузка текстур эмоций
+        baseTexture = new Texture(GameResources.CHARACTER_BASE);
+        happyTexture = new Texture(GameResources.CHARACTER_HAPPY);
+        sadTexture = new Texture(GameResources.CHARACTER_SAD);
+        sleepyTexture = new Texture(GameResources.CHARACTER_SLEEPY);
+        baseTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        happyTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        sadTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        sleepyTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        currentCharacterTexture = baseTexture;
 
-        // Создаём кнопку Move
+        // Кнопка Move
         font = new BitmapFont();
         font.getData().setScale(1.5f);
         TextureRegionDrawable buttonBg = new TextureRegionDrawable(
@@ -95,18 +103,15 @@ public abstract class BaseScreen extends ScreenAdapter {
         moveButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                // Переключение на следующую локацию по кругу
                 currentLocationIndex = (currentLocationIndex + 1) % LOCATIONS.length;
                 BottomPanelButton.LocationType nextLocation = LOCATIONS[currentLocationIndex];
-                if (screenManager != null) {
-                    screenManager.switchToLocation(nextLocation);
-                }
+                if (screenManager != null) screenManager.switchToLocation(nextLocation);
             }
         });
 
         stage = new Stage();
         stage.addActor(moveButton);
-        Gdx.input.setInputProcessor(stage);  // важно для работы кнопки
+        Gdx.input.setInputProcessor(stage);
 
         bottomPanel = new BottomPanel(WORLD_WIDTH, WORLD_HEIGHT, 1f);
         topPanel = new TopPanel(WORLD_WIDTH, WORLD_HEIGHT, 1f, this, screenManager);
@@ -121,6 +126,21 @@ public abstract class BaseScreen extends ScreenAdapter {
 
         wasTouched = false;
         onScreenShow();
+    }
+
+    // Обновление эмоции по состоянию питомца
+    private void updateCharacterEmotion() {
+        if (petEngine == null) return;
+        var pet = petEngine.getPet();
+        if (pet.getEnergy() <= 20) {
+            currentCharacterTexture = sleepyTexture;
+        } else if (pet.getHunger() <= 20 || pet.getCleanliness() <= 20) {
+            currentCharacterTexture = sadTexture;
+        } else if (pet.getHappiness() >= 80) {
+            currentCharacterTexture = happyTexture;
+        } else {
+            currentCharacterTexture = baseTexture;
+        }
     }
 
     public abstract CatRoomState getCatRoomState();
@@ -158,6 +178,9 @@ public abstract class BaseScreen extends ScreenAdapter {
         statsFont.setColor(getStatColor(pet.getCleanliness()));
         statsFont.draw(batch, pet.getCleanliness() + "%", startX + 100, startY - lineHeight * 3);
         statsFont.setColor(Color.WHITE);
+
+        coinsFont.setColor(Color.GOLD);
+        coinsFont.draw(batch, "Coins: " + pet.getCoins(), WORLD_WIDTH - 150, WORLD_HEIGHT - 40);
     }
 
     protected void onScreenShow() {}
@@ -173,14 +196,11 @@ public abstract class BaseScreen extends ScreenAdapter {
                 touchX = (int) worldCoords.x;
                 touchY = (int) worldCoords.y;
             }
-            // Нижняя панель
             if (bottomPanel.handleTouch(touchX, touchY)) {
                 onBottomPanelLocationChanged(bottomPanel.getActiveLocation());
             }
-            // Верхняя панель
             topPanel.handleTouch(touchX, touchY);
-            // Клик по персонажу
-            if (shouldDrawCharacter() && characterTexture != null) {
+            if (shouldDrawCharacter() && currentCharacterTexture != null) {
                 int centerX = WORLD_WIDTH / 2;
                 int centerY = WORLD_HEIGHT / 2;
                 int touchArea = 300;
@@ -195,16 +215,11 @@ public abstract class BaseScreen extends ScreenAdapter {
     }
 
     protected void onBottomPanelLocationChanged(BottomPanelButton.LocationType location) {
-        if (screenManager != null) {
-            screenManager.switchToLocation(location);
-        }
+        if (screenManager != null) screenManager.switchToLocation(location);
     }
 
     public void setActiveLocation(BottomPanelButton.LocationType location) {
-        if (bottomPanel != null) {
-            bottomPanel.setActiveLocation(location);
-        }
-        // Синхронизируем индекс для moveButton
+        if (bottomPanel != null) bottomPanel.setActiveLocation(location);
         for (int i = 0; i < LOCATIONS.length; i++) {
             if (LOCATIONS[i] == location) {
                 currentLocationIndex = i;
@@ -216,18 +231,19 @@ public abstract class BaseScreen extends ScreenAdapter {
     @Override
     public void render(float delta) {
         handleInput();
+        updateCharacterEmotion();  // обновляем эмоцию каждый кадр
         ScreenUtils.clear(0.9f, 0.85f, 0.8f, 1);
         batch.setProjectionMatrix(((MemeGotchi) screenManager).camera.combined);
 
         batch.begin();
         batch.draw(backgroundTexture, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
 
-        if (shouldDrawCharacter() && characterTexture != null) {
-            float charDrawWidth = characterTexture.getWidth() * CHARACTER_SCALE;
-            float charDrawHeight = characterTexture.getHeight() * CHARACTER_SCALE;
-            float charX = (WORLD_WIDTH - charDrawWidth) / 2;
-            float charY = (WORLD_HEIGHT - charDrawHeight) / 2 - 30;
-            batch.draw(characterTexture, charX, charY, charDrawWidth, charDrawHeight);
+        if (shouldDrawCharacter() && currentCharacterTexture != null) {
+            float w = currentCharacterTexture.getWidth() * CHARACTER_SCALE;
+            float h = currentCharacterTexture.getHeight() * CHARACTER_SCALE;
+            float x = (WORLD_WIDTH - w) / 2;
+            float y = (WORLD_HEIGHT - h) / 2 - 70;
+            batch.draw(currentCharacterTexture, x, y, w, h);
         }
 
         drawStats();
@@ -240,8 +256,6 @@ public abstract class BaseScreen extends ScreenAdapter {
 
         bottomPanel.render(batch, shapeRenderer);
         topPanel.render(batch, shapeRenderer);
-
-        // Рисуем Stage (кнопку Move) поверх всего
         if (stage != null) {
             stage.act(delta);
             stage.draw();
@@ -267,7 +281,10 @@ public abstract class BaseScreen extends ScreenAdapter {
         if (batch != null) batch.dispose();
         if (shapeRenderer != null) shapeRenderer.dispose();
         if (backgroundTexture != null) backgroundTexture.dispose();
-        if (characterTexture != null) characterTexture.dispose();
+        if (baseTexture != null) baseTexture.dispose();
+        if (happyTexture != null) happyTexture.dispose();
+        if (sadTexture != null) sadTexture.dispose();
+        if (sleepyTexture != null) sleepyTexture.dispose();
         if (bottomPanel != null) bottomPanel.dispose();
         if (topPanel != null) topPanel.dispose();
         if (statsFont != null) statsFont.dispose();
@@ -283,6 +300,6 @@ public abstract class BaseScreen extends ScreenAdapter {
     }
 
     public abstract String getBackgroundPath();
-    public abstract String getCharacterPath();
+    public abstract String getCharacterPath(); // не используется, но нужно для совместимости
     public abstract boolean shouldDrawCharacter();
 }
