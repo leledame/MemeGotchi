@@ -8,6 +8,7 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.memegotchi.game.buttons.BottomPanelButton.LocationType;
 import com.memegotchi.game.engine.PetEngine;
+import com.memegotchi.game.engine.SoundManager;
 import com.memegotchi.game.model.PetModel;
 import com.memegotchi.game.screens.*;
 import com.memegotchi.game.storage.GameStorage;
@@ -34,6 +35,9 @@ public class MemeGotchi extends Game implements ScreenManager {
     private BaseScreen previousScreen;
 
     private CatRoomState currentCatRoom = CatRoomState.LIVING;
+    private SettingsScreen settingsScreen;
+    private SoundManager soundManager;
+
 
     @Override
     public CatRoomState getCurrentCatRoom() {
@@ -84,6 +88,33 @@ public class MemeGotchi extends Game implements ScreenManager {
 
         setScreen(startScreen);
         currentScreen = null;
+        // в create() после инициализации других экранов:
+        settingsScreen = new SettingsScreen(petEngine);
+        settingsScreen.setScreenManager(this);
+
+        soundManager = new SoundManager();
+        soundManager.loadSettings(storage.isMusicOn(), storage.isSoundOn());
+        if (storage.isMusicOn()) soundManager.playBackground();
+
+
+
+
+    }
+
+    @Override
+    public void switchToSettings() {
+        if (currentScreen != settingsScreen) {
+            previousScreen = currentScreen;
+            setScreen(settingsScreen);
+            currentScreen = settingsScreen;
+        }
+    }
+    public void updateMusic() {
+        if (soundManager != null) soundManager.setMusicEnabled(storage.isMusicOn());
+    }
+
+    public void updateSound() {
+        if (soundManager != null) soundManager.setSoundEnabled(storage.isSoundOn());
     }
 
     @Override

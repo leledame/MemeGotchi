@@ -8,4 +8,6 @@ public interface ScreenManager {
     void backToPreviousScreen();
     CatRoomState getCurrentCatRoom();
     void setCatRoom(CatRoomState room);
+
+    void switchToSettings();
 }

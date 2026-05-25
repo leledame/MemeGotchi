@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.memegotchi.game.FontBuilder;
 import com.memegotchi.game.GameResources;
 import com.memegotchi.game.MemeGotchi;
 import com.memegotchi.game.buttons.Button;
@@ -27,13 +28,9 @@ public class StartScreen extends ScreenAdapter {
         background = new Texture(GameResources.START);
         background.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
 
-        buttonFont = new BitmapFont();
-        buttonFont.getData().setScale(2.5f);
-        buttonFont.setColor(Color.WHITE);
+        buttonFont = FontBuilder.generate(36, Color.WHITE, "fonts/segoe-ui-emoji_0.ttf");
+        titleFont = FontBuilder.generate(50, Color.PINK, "fonts/segoe-ui-emoji_0.ttf");
 
-        titleFont = new BitmapFont();
-        titleFont.getData().setScale(3.5f);
-        titleFont.setColor(Color.PINK);
 
         int centerX = (GameResources.SCREEN_WIDTH - 400) / 2;
 
@@ -51,9 +48,9 @@ public class StartScreen extends ScreenAdapter {
             game.batch.draw(background, 0, 0, GameResources.SCREEN_WIDTH, GameResources.SCREEN_HEIGHT);
         }
 
-        titleFont.draw(game.batch, "MEMEGOTCHI",
-                GameResources.SCREEN_WIDTH / 2f - 170,
-                GameResources.SCREEN_HEIGHT - 200);
+        titleFont.draw(game.batch, "✨ MEMEGOTCHI ✨",
+                GameResources.SCREEN_WIDTH / 2f - 230,
+                GameResources.SCREEN_HEIGHT - 250);
 
         startButton.render(game.batch, false);
         game.batch.end();

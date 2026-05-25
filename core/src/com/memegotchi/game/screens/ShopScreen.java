@@ -7,15 +7,18 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.memegotchi.game.GameResources;
 import com.memegotchi.game.buttons.Button;
 import com.memegotchi.game.engine.PetEngine;
+import com.memegotchi.game.model.PetModel;
 
 public class ShopScreen extends BaseScreen {
     private Button backButton;
     private Button buyFoodButton;
     private Button buyToyButton;
     private Button buyCleanButton;
+    private Button buyEnergyButton;
     private BitmapFont titleFont;
     private BitmapFont priceFont;
     private BitmapFont buttonFont;
+    PetModel pet;
 
     public ShopScreen(PetEngine petEngine) {
         super(petEngine);
@@ -40,9 +43,10 @@ public class ShopScreen extends BaseScreen {
         int startY = GameResources.SCREEN_HEIGHT - 300;
 
         backButton = new Button(25, GameResources.SCREEN_HEIGHT - 110, 280, 90, buttonFont, GameResources.BUTTON_TEXT, "BACK");
-        buyFoodButton = new Button(centerX, startY, buttonWidth, buttonHeight, buttonFont, GameResources.BUTTON_TEXT, "🍕 Food (10💰)");
-        buyToyButton = new Button(centerX, startY - 100, buttonWidth, buttonHeight, buttonFont, GameResources.BUTTON_TEXT, "🎾 Toy (20💰)");
-        buyCleanButton = new Button(centerX, startY - 200, buttonWidth, buttonHeight, buttonFont, GameResources.BUTTON_TEXT, "🧼 Shampoo (15💰)");
+        buyFoodButton = new Button(centerX, startY, buttonWidth, buttonHeight, buttonFont, GameResources.BUTTON_TEXT, "Food (10$)");
+        buyToyButton = new Button(centerX, startY - 100, buttonWidth, buttonHeight, buttonFont, GameResources.BUTTON_TEXT, "Toy (20$)");
+        buyCleanButton = new Button(centerX, startY - 200, buttonWidth, buttonHeight, buttonFont, GameResources.BUTTON_TEXT, "Shampoo (15$)");
+        buyEnergyButton = new Button(centerX, startY - 300, buttonWidth, buttonHeight, buttonFont, GameResources.BUTTON_TEXT, "Borosti potion (15$)");
     }
 
     @Override
@@ -57,15 +61,16 @@ public class ShopScreen extends BaseScreen {
         }
 
         titleFont.setColor(Color.GOLD);
-        titleFont.draw(batch, "🛒 SHOP 🛒", GameResources.SCREEN_WIDTH / 2f - 100, GameResources.SCREEN_HEIGHT - 130);
+        titleFont.draw(batch, "SHOP", GameResources.SCREEN_WIDTH / 2f - 100, GameResources.SCREEN_HEIGHT - 130);
 
         priceFont.setColor(Color.GOLD);
-        priceFont.draw(batch, "💰 " + petEngine.getPet().getCoins() + " coins",
+        priceFont.draw(batch, petEngine.getPet().getCoins() + " coins",
                 GameResources.SCREEN_WIDTH / 2f - 80, GameResources.SCREEN_HEIGHT - 170);
 
         buyFoodButton.render(batch, false);
         buyToyButton.render(batch, false);
         buyCleanButton.render(batch, false);
+        buyEnergyButton.render(batch, false);
         backButton.render(batch, false);
 
         batch.end();
@@ -83,22 +88,51 @@ public class ShopScreen extends BaseScreen {
                 screenManager.backToPreviousScreen();
                 return;
             }
-
             if (buyFoodButton.contains(x, y)) {
-                if (petEngine.getPet().getCoins() >= 10) {
-                    petEngine.getPet().setCoins(petEngine.getPet().getCoins() - 10);
-                    petEngine.feed();
-                }
+                if (petEngine.getPet().getCoins() >= 5) {
+                    if (petEngine.getPet().getHunger() < 100) {
+                        petEngine.getPet().setCoins(petEngine.getPet().getCoins() - 5);
+                        petEngine.feed();
+                        showMessage("Yummy! +20 hunger");
+                    } else showMessage("I'm already full!");
+                } else showMessage("Not enough coins!");
+
             } else if (buyToyButton.contains(x, y)) {
                 if (petEngine.getPet().getCoins() >= 20) {
-                    petEngine.getPet().setCoins(petEngine.getPet().getCoins() - 20);
-                    petEngine.play();
+                    if (petEngine.getPet().getHappiness() < 100) {
+                        petEngine.getPet().setCoins(petEngine.getPet().getCoins() - 20);
+                        petEngine.play();
+                    }
+                    else {
+                        showMessage("Я наигрался!");
+                    }
+
                 }
+
             } else if (buyCleanButton.contains(x, y)) {
                 if (petEngine.getPet().getCoins() >= 15) {
-                    petEngine.getPet().setCoins(petEngine.getPet().getCoins() - 15);
-                    petEngine.clean();
+                    if (petEngine.getPet().getCleanliness() < 100) {
+                        petEngine.getPet().setCoins(petEngine.getPet().getCoins() - 15);
+                        petEngine.clean();
+                    }
+                    else {
+                        showMessage("Я чистенький!");
+                    }
+
                 }
+
+            } else if (buyEnergyButton.contains(x, y)) {
+                if (petEngine.getPet().getCoins() >= 15) {
+                    if (petEngine.getPet().getEnergy() < 100) {
+                        petEngine.getPet().setCoins(petEngine.getPet().getCoins() - 15);
+                        petEngine.sleep();
+                    }
+                    else {
+                        showMessage("Я выспался!");
+                    }
+
+                }
+
             }
         }
     }

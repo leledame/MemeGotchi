@@ -26,16 +26,16 @@ public abstract class BaseScreen extends ScreenAdapter {
     protected float scale;
     protected Stage stage;
     protected TextButton moveButton;
-    protected BitmapFont font;
+    protected BitmapFont font, messageFont;
     protected BottomPanel bottomPanel;
     protected TopPanel topPanel;
     protected ScreenManager screenManager;
     protected PetEngine petEngine;
 
     protected BitmapFont statsFont;
+    float messageTimer;
     protected BitmapFont coinsFont;
-    Button buttonPlay;
-
+    String currentMessage;
     private boolean wasTouched = false;
     protected static final float CHARACTER_SCALE = 15f;
 
@@ -50,7 +50,10 @@ public abstract class BaseScreen extends ScreenAdapter {
     public void setScreenManager(ScreenManager screenManager) {
         this.screenManager = screenManager;
     }
-
+    public void showMessage(String text) {
+        currentMessage = text;
+        messageTimer = 2.5f;   // сообщение будет висеть 2.5 секунды
+    }
     @Override
     public void show() {
         disposeResources();
@@ -76,10 +79,14 @@ public abstract class BaseScreen extends ScreenAdapter {
         topPanel = new TopPanel(WORLD_WIDTH, WORLD_HEIGHT, 1f, this);
 
         statsFont = new BitmapFont();
-        statsFont.getData().setScale(1.5f);
+        statsFont.getData().setScale(2.0f);
 
         coinsFont = new BitmapFont();
-        coinsFont.getData().setScale(1.8f);
+        coinsFont.getData().setScale(2.0f);
+        messageFont = new BitmapFont();   // если нет отдельного
+        messageFont.setColor(Color.PINK);
+// увеличим размер, если нужно
+        messageFont.getData().setScale(1.5f);
 
         wasTouched = false;
         onScreenShow();
@@ -104,32 +111,30 @@ public abstract class BaseScreen extends ScreenAdapter {
         statsFont.setColor(Color.WHITE);
 
         // Голод 🍕
-        statsFont.draw(batch, "🍕", startX, startY);
+        statsFont.draw(batch, "Hunger", startX, startY);
         statsFont.setColor(getStatColor(pet.getHunger()));
-        statsFont.draw(batch, pet.getHunger() + "%", startX + 45, startY);
+        statsFont.draw(batch, pet.getHunger() + "%", startX + 100, startY);
         statsFont.setColor(Color.WHITE);
 
         // Счастье 😊
-        statsFont.draw(batch, "😊", startX, startY - lineHeight);
+        statsFont.draw(batch, "Happy", startX, startY - lineHeight);
         statsFont.setColor(getStatColor(pet.getHappiness()));
-        statsFont.draw(batch, pet.getHappiness() + "%", startX + 45, startY - lineHeight);
+        statsFont.draw(batch, pet.getHappiness() + "%", startX + 100, startY - lineHeight);
         statsFont.setColor(Color.WHITE);
 
         // Энергия ⚡
-        statsFont.draw(batch, "⚡", startX, startY - lineHeight * 2);
+        statsFont.draw(batch, "Energy", startX, startY - lineHeight * 2);
         statsFont.setColor(getStatColor(pet.getEnergy()));
-        statsFont.draw(batch, pet.getEnergy() + "%", startX + 45, startY - lineHeight * 2);
+        statsFont.draw(batch, pet.getEnergy() + "%", startX + 100, startY - lineHeight * 2);
         statsFont.setColor(Color.WHITE);
 
         // Чистота 🧼
-        statsFont.draw(batch, "🧼", startX, startY - lineHeight * 3);
+        statsFont.draw(batch, "Clean", startX, startY - lineHeight * 3);
         statsFont.setColor(getStatColor(pet.getCleanliness()));
-        statsFont.draw(batch, pet.getCleanliness() + "%", startX + 45, startY - lineHeight * 3);
+        statsFont.draw(batch, pet.getCleanliness() + "%", startX + 100, startY - lineHeight * 3);
         statsFont.setColor(Color.WHITE);
 
-        // Монеты
-        coinsFont.setColor(Color.GOLD);
-        coinsFont.draw(batch, "💰 " + pet.getCoins(), WORLD_WIDTH - 130, WORLD_HEIGHT - 40);
+
     }
 
     protected void onScreenShow() {}
@@ -210,6 +215,12 @@ public abstract class BaseScreen extends ScreenAdapter {
         }
 
         drawStats();
+        if (messageTimer > 0) {
+            messageTimer -= delta;
+            // рисуем сообщение вверху экрана по центру
+            float msgX = WORLD_WIDTH / 2f - messageFont.getRegion().getRegionWidth() / 2f;
+            messageFont.draw(batch, currentMessage, msgX, WORLD_HEIGHT - 80);
+        }
         batch.end();
 
         bottomPanel.render(batch, shapeRenderer);

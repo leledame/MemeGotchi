@@ -12,6 +12,13 @@ public class GameStorage {
     private static final String KEY_CLEANLINESS = "cleanliness";
     private static final String KEY_COINS = "coins";
     private static final String KEY_LAST_SAVE = "lastSaveTime";
+    private static final String KEY_MUSIC_ON = "musicOn";
+    private static final String KEY_SOUND_ON = "soundOn";
+
+    public boolean isMusicOn() { return prefs.getBoolean(KEY_MUSIC_ON, true); }
+    public boolean isSoundOn() { return prefs.getBoolean(KEY_SOUND_ON, true); }
+    public void saveMusicSettings(boolean on) { prefs.putBoolean(KEY_MUSIC_ON, on); prefs.flush(); }
+    public void saveSoundSettings(boolean on) { prefs.putBoolean(KEY_SOUND_ON, on); prefs.flush(); }
 
     private Preferences prefs;
 

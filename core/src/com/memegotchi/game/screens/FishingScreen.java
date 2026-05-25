@@ -20,7 +20,8 @@ import com.memegotchi.game.MemeGotchi;
 import com.memegotchi.game.engine.PetEngine;
 
 public class FishingScreen extends BaseScreen {
-    private static final float SIZE_MULTIPLIER = 5.0f;
+    private static final float SIZE_MULTIPLIER = 5.0f, scale = 1;
+
 
     // Система паттернов и данных рыбок
     public enum FishPattern {NORMAL, FAST, VERY_FAST}
@@ -115,7 +116,7 @@ public class FishingScreen extends BaseScreen {
         currentMoveTime = 0f;
 
         buttonFont = new BitmapFont();
-        buttonFont.getData().setScale(1.5f);
+        buttonFont.getData().setScale(3.5f);
 
         gameFishingBackgroundTexture = new Texture("backgronds/fishing/gamefish.png");
         fishTexture = new Texture("backgronds/fishing/fish_for_game.png");
