@@ -2,6 +2,7 @@ package com.memegotchi.game.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.memegotchi.game.GameResources;
@@ -40,9 +41,14 @@ public class ShopScreen extends BaseScreen {
         int startY = GameResources.SCREEN_HEIGHT - 300;
 
         backButton = new Button(25, GameResources.SCREEN_HEIGHT - 110, 280, 90, buttonFont, GameResources.BUTTON_TEXT, "BACK");
-        buyFoodButton = new Button(centerX, startY, buttonWidth, buttonHeight, buttonFont, GameResources.BUTTON_TEXT, "🍕 Food (10💰)");
-        buyToyButton = new Button(centerX, startY - 100, buttonWidth, buttonHeight, buttonFont, GameResources.BUTTON_TEXT, "🎾 Toy (20💰)");
-        buyCleanButton = new Button(centerX, startY - 200, buttonWidth, buttonHeight, buttonFont, GameResources.BUTTON_TEXT, "🧼 Shampoo (15💰)");
+        buyFoodButton = new Button(centerX, startY, buttonWidth, buttonHeight, buttonFont, GameResources.BUTTON_TEXT, "Food (10)");
+        buyToyButton = new Button(centerX, startY - 100, buttonWidth, buttonHeight, buttonFont, GameResources.BUTTON_TEXT, "Toy (20)");
+        buyCleanButton = new Button(centerX, startY - 200, buttonWidth, buttonHeight, buttonFont, GameResources.BUTTON_TEXT, "Shampoo (15)");
+
+        backButton.getTexture().setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        buyFoodButton.getTexture().setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        buyToyButton.getTexture().setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        buyCleanButton.getTexture().setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
     }
 
     @Override
@@ -57,11 +63,11 @@ public class ShopScreen extends BaseScreen {
         }
 
         titleFont.setColor(Color.GOLD);
-        titleFont.draw(batch, "🛒 SHOP 🛒", GameResources.SCREEN_WIDTH / 2f - 100, GameResources.SCREEN_HEIGHT - 130);
+        titleFont.draw(batch, "SHOP", GameResources.SCREEN_WIDTH / 2f - 60, GameResources.SCREEN_HEIGHT - 130);
 
         priceFont.setColor(Color.GOLD);
-        priceFont.draw(batch, "💰 " + petEngine.getPet().getCoins() + " coins",
-                GameResources.SCREEN_WIDTH / 2f - 80, GameResources.SCREEN_HEIGHT - 170);
+        priceFont.draw(batch, petEngine.getPet().getCoins() + " coins",
+                GameResources.SCREEN_WIDTH / 2f - 50, GameResources.SCREEN_HEIGHT - 170);
 
         buyFoodButton.render(batch, false);
         buyToyButton.render(batch, false);
@@ -115,6 +121,11 @@ public class ShopScreen extends BaseScreen {
 
     @Override
     public boolean shouldDrawCharacter() {
+        return false;
+    }
+
+    @Override
+    protected boolean showMoveButton() {
         return false;
     }
 

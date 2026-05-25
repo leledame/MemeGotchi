@@ -66,9 +66,6 @@ public class TopPanel extends Panel {
         shapeRenderer.end();
 
         batch.begin();
-        font.setColor(Color.BLACK);
-        font.draw(batch, "✨", 15, screenHeight - 25);
-        font.draw(batch, "🛒", screenWidth - 80, screenHeight - 25);
         if (shopButton != null) {
             shopButton.render(batch, false);
         }

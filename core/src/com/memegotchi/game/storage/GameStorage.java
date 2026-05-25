@@ -29,10 +29,15 @@ public class GameStorage {
         prefs.flush();
     }
 
+    public void clear() {
+        prefs.clear();
+        prefs.flush();
+    }
+
     public PetModel load() {
         PetModel pet = new PetModel();
-        pet.setHunger(prefs.getInteger(KEY_HUNGER, 80));
-        pet.setHappiness(prefs.getInteger(KEY_HAPPINESS, 80));
+        pet.setHunger(prefs.getInteger(KEY_HUNGER, 100));
+        pet.setHappiness(prefs.getInteger(KEY_HAPPINESS, 100));
         pet.setEnergy(prefs.getInteger(KEY_ENERGY, 100));
         pet.setCleanliness(prefs.getInteger(KEY_CLEANLINESS, 100));
         pet.setCoins(prefs.getInteger(KEY_COINS, 100));

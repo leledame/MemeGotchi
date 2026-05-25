@@ -24,6 +24,6 @@ public class KitchenScreen extends BaseScreen {
     }
     @Override
     public boolean shouldDrawCharacter() {
-        return false;
+        return true;
     }
 }
