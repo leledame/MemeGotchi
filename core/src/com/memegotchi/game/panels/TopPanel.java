@@ -4,9 +4,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.memegotchi.game.GameResources;
 import com.memegotchi.game.buttons.TopButton;
-import com.memegotchi.game.model.PetModel;
 import com.memegotchi.game.screens.BaseScreen;
 import com.memegotchi.game.screens.ScreenManager;
 
@@ -18,22 +16,20 @@ public class TopPanel extends Panel {
     private static final float BORDER_SCALE = 18f;
     private TopButton shopButton;
     private TopButton settingsButton;
-    private BaseScreen parentScreen;
-    private ScreenManager screenManager;
+    private ScreenManager screenManager;      // добавлено поле
     private BitmapFont font;
-    PetModel pet;
     private BitmapFont timeFont;
 
-    // Часы
     private String timeString = "";
     private long lastTimeUpdate = 0;
     private SimpleDateFormat timeFormat;
 
     public enum TopMenuType { SHOP, SETTINGS }
 
-    public TopPanel(int screenWidth, int screenHeight, float scale, BaseScreen parent) {
+    // Конструктор теперь принимает ScreenManager
+    public TopPanel(int screenWidth, int screenHeight, float scale, BaseScreen parent, ScreenManager sm) {
         super(screenWidth, screenHeight, scale, false);
-        this.parentScreen = parent;
+        this.screenManager = sm;               // сохраняем
         initButtons();
         font = new BitmapFont();
         font.getData().setScale(1.5f);
@@ -95,29 +91,22 @@ public class TopPanel extends Panel {
 
         batch.begin();
 
-        // Обновление времени раз в секунду
+        // Часы
         long now = System.currentTimeMillis();
         if (now - lastTimeUpdate >= 1000) {
             lastTimeUpdate = now;
             updateTimeString();
         }
-
-        // Рисуем часы слева
         timeFont.setColor(Color.WHITE);
         timeFont.draw(batch, timeString, 15, screenHeight - 25);
 
-        // Рисуем иконку ✨ рядом с часами
+        // Иконка ✨
         font.setColor(Color.BLACK);
         font.draw(batch, "✨", 15 + timeFont.getRegion().getRegionWidth() * 1.2f, screenHeight - 25);
 
-
-        // Рисуем сами кнопки (текстуры, если есть)
+        // Кнопки
         if (shopButton != null) shopButton.render(batch, false);
         if (settingsButton != null) settingsButton.render(batch, false);
-        // Монеты
-//        font.setColor(Color.GOLD);
-
-//        font.draw(batch, "Coin " + pet.getCoins(), GameResources.SCREEN_WIDTH - 130, GameResources.SCREEN_HEIGHT - 300);
 
         batch.end();
     }

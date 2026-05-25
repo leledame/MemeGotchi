@@ -6,10 +6,13 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.memegotchi.game.GameResources;
 import com.memegotchi.game.MemeGotchi;
@@ -33,15 +36,23 @@ public abstract class BaseScreen extends ScreenAdapter {
     protected PetEngine petEngine;
 
     protected BitmapFont statsFont;
-    float messageTimer;
     protected BitmapFont coinsFont;
-    String currentMessage;
+    protected String currentMessage = "";
+    protected float messageTimer = 0f;
     private boolean wasTouched = false;
     protected static final float CHARACTER_SCALE = 15f;
-
-    // Фиксированные размеры игры
     protected static final int WORLD_WIDTH = GameResources.SCREEN_WIDTH;
     protected static final int WORLD_HEIGHT = GameResources.SCREEN_HEIGHT;
+
+    // Массив всех возможных локаций для переключения по кругу
+    private static final BottomPanelButton.LocationType[] LOCATIONS = {
+            BottomPanelButton.LocationType.LIVING,
+            BottomPanelButton.LocationType.BEDROOM,
+            BottomPanelButton.LocationType.KITCHEN,
+            BottomPanelButton.LocationType.TOILET,
+            BottomPanelButton.LocationType.WALK
+    };
+    private int currentLocationIndex = 0;
 
     public BaseScreen(PetEngine petEngine) {
         this.petEngine = petEngine;
@@ -50,21 +61,19 @@ public abstract class BaseScreen extends ScreenAdapter {
     public void setScreenManager(ScreenManager screenManager) {
         this.screenManager = screenManager;
     }
+
     public void showMessage(String text) {
         currentMessage = text;
-        messageTimer = 2.5f;   // сообщение будет висеть 2.5 секунды
+        messageTimer = 2.5f;
     }
+
     @Override
     public void show() {
         disposeResources();
 
         batch = new SpriteBatch();
         shapeRenderer = new ShapeRenderer();
-
-
-
-        // Используем мировые координаты (фиксированные)
-        scale = 1f; // Не используем масштаб, так как FitViewport уже масштабирует
+        scale = 1f;
 
         backgroundTexture = new Texture(getBackgroundPath());
         backgroundTexture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
@@ -74,18 +83,40 @@ public abstract class BaseScreen extends ScreenAdapter {
             characterTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
         }
 
-        // Панели создаются с мировыми координатами
+        // Создаём кнопку Move
+        font = new BitmapFont();
+        font.getData().setScale(1.5f);
+        TextureRegionDrawable buttonBg = new TextureRegionDrawable(
+                new TextureRegion(new Texture("buttons/text_button/button.png")));
+        TextButton.TextButtonStyle style = new TextButton.TextButtonStyle(buttonBg, buttonBg, buttonBg, font);
+        moveButton = new TextButton("MOVE", style);
+        moveButton.setSize(90, 35);
+        moveButton.setPosition(WORLD_WIDTH / 2f - 230, 90);
+        moveButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                // Переключение на следующую локацию по кругу
+                currentLocationIndex = (currentLocationIndex + 1) % LOCATIONS.length;
+                BottomPanelButton.LocationType nextLocation = LOCATIONS[currentLocationIndex];
+                if (screenManager != null) {
+                    screenManager.switchToLocation(nextLocation);
+                }
+            }
+        });
+
+        stage = new Stage();
+        stage.addActor(moveButton);
+        Gdx.input.setInputProcessor(stage);  // важно для работы кнопки
+
         bottomPanel = new BottomPanel(WORLD_WIDTH, WORLD_HEIGHT, 1f);
-        topPanel = new TopPanel(WORLD_WIDTH, WORLD_HEIGHT, 1f, this);
+        topPanel = new TopPanel(WORLD_WIDTH, WORLD_HEIGHT, 1f, this, screenManager);
 
         statsFont = new BitmapFont();
         statsFont.getData().setScale(2.0f);
-
         coinsFont = new BitmapFont();
         coinsFont.getData().setScale(2.0f);
-        messageFont = new BitmapFont();   // если нет отдельного
+        messageFont = new BitmapFont();
         messageFont.setColor(Color.PINK);
-// увеличим размер, если нужно
         messageFont.getData().setScale(1.5f);
 
         wasTouched = false;
@@ -102,73 +133,53 @@ public abstract class BaseScreen extends ScreenAdapter {
 
     protected void drawStats() {
         if (petEngine == null) return;
-
         var pet = petEngine.getPet();
-        int startX = (int) (GameResources.SCREEN_WIDTH * 0.05);
+        int startX = (int) (WORLD_WIDTH * 0.05);
         int startY = (int) (WORLD_HEIGHT * 0.86);
         int lineHeight = 40;
 
         statsFont.setColor(Color.WHITE);
-
-        // Голод 🍕
         statsFont.draw(batch, "Hunger", startX, startY);
         statsFont.setColor(getStatColor(pet.getHunger()));
         statsFont.draw(batch, pet.getHunger() + "%", startX + 100, startY);
         statsFont.setColor(Color.WHITE);
 
-        // Счастье 😊
         statsFont.draw(batch, "Happy", startX, startY - lineHeight);
         statsFont.setColor(getStatColor(pet.getHappiness()));
         statsFont.draw(batch, pet.getHappiness() + "%", startX + 100, startY - lineHeight);
         statsFont.setColor(Color.WHITE);
 
-        // Энергия ⚡
         statsFont.draw(batch, "Energy", startX, startY - lineHeight * 2);
         statsFont.setColor(getStatColor(pet.getEnergy()));
         statsFont.draw(batch, pet.getEnergy() + "%", startX + 100, startY - lineHeight * 2);
         statsFont.setColor(Color.WHITE);
 
-        // Чистота 🧼
         statsFont.draw(batch, "Clean", startX, startY - lineHeight * 3);
         statsFont.setColor(getStatColor(pet.getCleanliness()));
         statsFont.draw(batch, pet.getCleanliness() + "%", startX + 100, startY - lineHeight * 3);
         statsFont.setColor(Color.WHITE);
-
-
     }
 
     protected void onScreenShow() {}
 
     protected void handleInput() {
         boolean isTouched = Gdx.input.isTouched();
-
         if (isTouched && !wasTouched) {
-            // Получаем координаты касания в мировых координатах
             int touchX = Gdx.input.getX();
             int touchY = Gdx.input.getY();
-
-            // Конвертируем экранные координаты в мировые
             if (screenManager instanceof MemeGotchi) {
                 MemeGotchi game = (MemeGotchi) screenManager;
                 com.badlogic.gdx.math.Vector3 worldCoords = game.camera.unproject(new com.badlogic.gdx.math.Vector3(touchX, touchY, 0));
                 touchX = (int) worldCoords.x;
                 touchY = (int) worldCoords.y;
             }
-
+            // Нижняя панель
             if (bottomPanel.handleTouch(touchX, touchY)) {
                 onBottomPanelLocationChanged(bottomPanel.getActiveLocation());
             }
-
-            if (topPanel.handleTouch(touchX, touchY)) {
-                if (screenManager != null) {
-                    screenManager.switchToShop();
-                }
-            }
-            if (bottomPanel.handleTouch(touchX, touchY)) {
-                onBottomPanelLocationChanged(bottomPanel.getActiveLocation());
-            }
-
-            // Клик по персонажу для игры
+            // Верхняя панель
+            topPanel.handleTouch(touchX, touchY);
+            // Клик по персонажу
             if (shouldDrawCharacter() && characterTexture != null) {
                 int centerX = WORLD_WIDTH / 2;
                 int centerY = WORLD_HEIGHT / 2;
@@ -176,10 +187,10 @@ public abstract class BaseScreen extends ScreenAdapter {
                 if (touchX > centerX - touchArea && touchX < centerX + touchArea &&
                         touchY > centerY - touchArea && touchY < centerY + touchArea) {
                     petEngine.play();
+                    showMessage("+15 happy, -5 energy, -5 hunger");
                 }
             }
         }
-
         wasTouched = isTouched;
     }
 
@@ -193,17 +204,22 @@ public abstract class BaseScreen extends ScreenAdapter {
         if (bottomPanel != null) {
             bottomPanel.setActiveLocation(location);
         }
+        // Синхронизируем индекс для moveButton
+        for (int i = 0; i < LOCATIONS.length; i++) {
+            if (LOCATIONS[i] == location) {
+                currentLocationIndex = i;
+                break;
+            }
+        }
     }
 
     @Override
     public void render(float delta) {
         handleInput();
         ScreenUtils.clear(0.9f, 0.85f, 0.8f, 1);
-
         batch.setProjectionMatrix(((MemeGotchi) screenManager).camera.combined);
 
         batch.begin();
-        // Рисуем фон на весь мир
         batch.draw(backgroundTexture, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
 
         if (shouldDrawCharacter() && characterTexture != null) {
@@ -217,7 +233,6 @@ public abstract class BaseScreen extends ScreenAdapter {
         drawStats();
         if (messageTimer > 0) {
             messageTimer -= delta;
-            // рисуем сообщение вверху экрана по центру
             float msgX = WORLD_WIDTH / 2f - messageFont.getRegion().getRegionWidth() / 2f;
             messageFont.draw(batch, currentMessage, msgX, WORLD_HEIGHT - 80);
         }
@@ -225,11 +240,16 @@ public abstract class BaseScreen extends ScreenAdapter {
 
         bottomPanel.render(batch, shapeRenderer);
         topPanel.render(batch, shapeRenderer);
+
+        // Рисуем Stage (кнопку Move) поверх всего
+        if (stage != null) {
+            stage.act(delta);
+            stage.draw();
+        }
     }
 
     @Override
     public void resize(int width, int height) {
-        // Обновляем вьюпорт через MemeGotchi
         if (screenManager instanceof MemeGotchi) {
             MemeGotchi game = (MemeGotchi) screenManager;
             game.viewport.update(width, height, true);
@@ -239,17 +259,22 @@ public abstract class BaseScreen extends ScreenAdapter {
     }
 
     @Override
-    public void hide() {}
+    public void hide() {
+        Gdx.input.setInputProcessor(null);
+    }
 
     private void disposeResources() {
-        if (batch != null) { batch.dispose(); batch = null; }
-        if (shapeRenderer != null) { shapeRenderer.dispose(); shapeRenderer = null; }
-        if (backgroundTexture != null) { backgroundTexture.dispose(); backgroundTexture = null; }
-        if (characterTexture != null) { characterTexture.dispose(); characterTexture = null; }
-        if (bottomPanel != null) { bottomPanel.dispose(); bottomPanel = null; }
-        if (topPanel != null) { topPanel.dispose(); topPanel = null; }
-        if (statsFont != null) { statsFont.dispose(); statsFont = null; }
-        if (coinsFont != null) { coinsFont.dispose(); coinsFont = null; }
+        if (batch != null) batch.dispose();
+        if (shapeRenderer != null) shapeRenderer.dispose();
+        if (backgroundTexture != null) backgroundTexture.dispose();
+        if (characterTexture != null) characterTexture.dispose();
+        if (bottomPanel != null) bottomPanel.dispose();
+        if (topPanel != null) topPanel.dispose();
+        if (statsFont != null) statsFont.dispose();
+        if (coinsFont != null) coinsFont.dispose();
+        if (messageFont != null) messageFont.dispose();
+        if (stage != null) stage.dispose();
+        if (font != null) font.dispose();
     }
 
     @Override

@@ -58,7 +58,6 @@ public class MemeGotchi extends Game implements ScreenManager {
         camera.update();
 
         storage = new GameStorage();
-        storage.clear();
         pet = storage.load();
 
         // Обновляем питомца после загрузки
@@ -66,7 +65,7 @@ public class MemeGotchi extends Game implements ScreenManager {
         long minutesPassed = Math.max(0, (now - pet.getLastUpdateTime()) / (1000 * 60));
         petEngine = new PetEngine(pet);
         if (minutesPassed > 0) {
-            petEngine.updateOffline(minutesPassed);
+            petEngine.update(minutesPassed);
             pet.setLastUpdateTime(now);
             storage.save(pet);
         }
@@ -131,6 +130,19 @@ public class MemeGotchi extends Game implements ScreenManager {
         setScreen(targetScreen);
         currentScreen = targetScreen;
         currentScreen.setActiveLocation(location);
+
+        // Обновляем CatRoomState
+        if (targetScreen instanceof LivingRoomScreen) {
+            currentCatRoom = CatRoomState.LIVING;
+        } else if (targetScreen instanceof BedroomScreen) {
+            currentCatRoom = CatRoomState.BEDROOM;
+        } else if (targetScreen instanceof KitchenScreen) {
+            currentCatRoom = CatRoomState.KITCHEN;
+        } else if (targetScreen instanceof BathroomScreen) {
+            currentCatRoom = CatRoomState.TOILET;
+        } else if (targetScreen instanceof FishingScreen) {
+            currentCatRoom = CatRoomState.WALK_MINIGAME;
+        }
     }
 
     @Override
