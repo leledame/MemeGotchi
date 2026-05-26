@@ -3,6 +3,7 @@ package com.memegotchi.game.screens;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.viewport.Viewport;
 import com.memegotchi.game.GameResources;
 import com.memegotchi.game.MemeGotchi;
 import com.memegotchi.game.buttons.Button;
@@ -75,7 +76,7 @@ public class KitchenScreen extends BaseScreen {
 
         if (catIsHere && eatButton != null
                 && petEngine != null && petEngine.getPet() != null
-                && petEngine.getPet().hasFish()) {
+                && (petEngine.getPet().hasFood() || petEngine.getPet().hasFish())) {
             batch.begin();
             eatButton.render(batch, false);
             batch.end();
@@ -83,13 +84,19 @@ public class KitchenScreen extends BaseScreen {
             if (Gdx.input.justTouched()) {
                 Vector3 touchPos = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
                 if (screenManager instanceof MemeGotchi) {
-                    ((MemeGotchi) screenManager).camera.unproject(touchPos);
+                    BaseScreen.screenToWorld((MemeGotchi) screenManager, touchPos);
                 }
                 if (eatButton.contains((int) touchPos.x, (int) touchPos.y)) {
-                    String fish = petEngine.getPet().takeTopFish();
-                    if (fish != null) {
+                    if (petEngine.getPet().hasFood()) {
+                        petEngine.getPet().useFood();
                         petEngine.feed();
-                        showMessage("Ate " + fish + "! +20 hunger");
+                        showMessage("Yummy! +20 hunger");
+                    } else {
+                        String fish = petEngine.getPet().takeTopFish();
+                        if (fish != null) {
+                            petEngine.feed();
+                            showMessage("Ate " + fish + "! +20 hunger");
+                        }
                     }
                 }
             }

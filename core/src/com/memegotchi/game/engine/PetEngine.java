@@ -1,6 +1,5 @@
 package com.memegotchi.game.engine;
 
-import com.badlogic.gdx.math.MathUtils;
 import com.memegotchi.game.model.PetModel;
 
 public class PetEngine {
@@ -13,7 +12,7 @@ public class PetEngine {
     private float accumulatedTime = 0;
     private SleepListener sleepListener;
 
-    private static final float GAME_TICK = 2500f;
+    private static final float GAME_TICK = 60f;
     private static final float ENERGY_REGEN_RATE = 1f;
 
     private float tickMultiplier = 1.0f;
@@ -35,10 +34,10 @@ public class PetEngine {
         if (deltaMinutes <= 0) return;
         long ticks = deltaMinutes * 60 / (long) GAME_TICK;
         for (long i = 0; i < ticks && i < 500; i++) {
-            pet.setHunger(pet.getHunger() - MathUtils.random(2, 5));
-            pet.setHappiness(pet.getHappiness() - MathUtils.random(1, 3));
-            pet.setEnergy(pet.getEnergy() - MathUtils.random(1, 2));
-            pet.setCleanliness(pet.getCleanliness() - MathUtils.random(1, 3));
+            pet.setHunger(pet.getHunger() - 3);
+            pet.setHappiness(pet.getHappiness() - 5);
+            pet.setEnergy(pet.getEnergy() - 4);
+            pet.setCleanliness(pet.getCleanliness() - 1);
         }
         if (pet.getHunger() <= 0 || pet.getHappiness() <= 0) {
             pet.setEnergy(Math.max(0, pet.getEnergy() - 10));
@@ -64,12 +63,12 @@ public class PetEngine {
         if (accumulatedTime >= GAME_TICK * tickMultiplier) {
             accumulatedTime -= GAME_TICK * tickMultiplier;
 
-            pet.setHunger(pet.getHunger() - MathUtils.random(2, 5));
-            pet.setHappiness(pet.getHappiness() - MathUtils.random(1, 3));
+            pet.setHunger(pet.getHunger() - 3);
+            pet.setHappiness(pet.getHappiness() - 5);
             if (!pet.isSleeping()) {
-                pet.setEnergy(pet.getEnergy() - MathUtils.random(1, 2));
+                pet.setEnergy(pet.getEnergy() - 4);
             }
-            pet.setCleanliness(pet.getCleanliness() - MathUtils.random(1, 3));
+            pet.setCleanliness(pet.getCleanliness() - 1);
 
             if (pet.getHunger() <= 0 || pet.getHappiness() <= 0) {
                 pet.setEnergy(Math.max(0, pet.getEnergy() - 10));

@@ -17,8 +17,9 @@ public class GameStorage {
     private static final String KEY_FISH_COUNT = "fishCount";
     private static final String KEY_FISH_PREFIX = "fish_";
     private static final String KEY_SHAMPOO = "shampoo";
+    private static final String KEY_FOOD = "food";
     private static final String KEY_VERSION = "schemaVersion";
-    private static final int CURRENT_VERSION = 1;
+    private static final int CURRENT_VERSION = 2;
 
     public boolean isMusicOn() { return prefs.getBoolean(KEY_MUSIC_ON, true); }
     public boolean isSoundOn() { return prefs.getBoolean(KEY_SOUND_ON, true); }
@@ -58,6 +59,7 @@ public class GameStorage {
             prefs.putString(KEY_FISH_PREFIX + i, fishList.get(i));
         }
         prefs.putInteger(KEY_SHAMPOO, pet.getShampooCount());
+        prefs.putInteger(KEY_FOOD, pet.getFoodCount());
         prefs.flush();
     }
 
@@ -81,6 +83,7 @@ public class GameStorage {
         }
         pet.setFishInventory(fishList);
         pet.setShampooCount(prefs.getInteger(KEY_SHAMPOO, 0));
+        pet.setFoodCount(prefs.getInteger(KEY_FOOD, 0));
         return pet;
     }
 }

@@ -208,10 +208,7 @@ public class MemeGotchi extends Game implements ScreenManager {
     @Override
     public void resize(int width, int height) {
         viewport.update(width, height, true);
-        camera.position.set(GameResources.SCREEN_WIDTH / 2f, GameResources.SCREEN_HEIGHT / 2f, 0);
-        camera.update();
 
-        // Уведомляем текущий экран о ресайзе
         if (currentScreen != null) {
             currentScreen.resize(width, height);
         }

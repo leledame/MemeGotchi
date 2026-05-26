@@ -61,12 +61,12 @@ public class StartScreen extends ScreenAdapter {
 
     private void handleInput() {
         if (Gdx.input.justTouched()) {
-            int screenX = Gdx.input.getX();
-            int screenY = Gdx.input.getY();
-            float worldX = screenX * GameResources.SCREEN_WIDTH / (float) Gdx.graphics.getWidth();
-            float worldY = GameResources.SCREEN_HEIGHT - (screenY * GameResources.SCREEN_HEIGHT / (float) Gdx.graphics.getHeight());
+            com.badlogic.gdx.math.Vector3 touchPos = new com.badlogic.gdx.math.Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
+            BaseScreen.screenToWorld(game, touchPos);
+            int worldX = (int) touchPos.x;
+            int worldY = (int) touchPos.y;
 
-            if (startButton.contains((int) worldX, (int) worldY)) {
+            if (startButton.contains(worldX, worldY)) {
                 game.switchToLocation(BottomPanelButton.LocationType.LIVING);
             }
         }

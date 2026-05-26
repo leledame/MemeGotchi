@@ -7,9 +7,11 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.utils.viewport.Viewport;
 import com.memegotchi.game.GameResources;
 import com.memegotchi.game.MemeGotchi;
 import com.memegotchi.game.buttons.Button;
+import com.memegotchi.game.buttons.BottomPanelButton;
 import com.memegotchi.game.engine.PetEngine;
 
 public class ShopScreen extends BaseScreen {
@@ -47,7 +49,7 @@ public class ShopScreen extends BaseScreen {
         int startY = GameResources.SCREEN_HEIGHT - 300;
 
         backButton = new Button(25, GameResources.SCREEN_HEIGHT - 110, 280, 90, buttonFont, GameResources.BUTTON_TEXT, "BACK");
-        buyFoodButton = new Button(centerX, startY, buttonWidth, buttonHeight, buttonFont, GameResources.BUTTON_TEXT, "Food (10$)");
+        buyFoodButton = new Button(centerX, startY, buttonWidth, buttonHeight, buttonFont, GameResources.BUTTON_TEXT, "Food (5$)");
         buyCleanButton = new Button(centerX, startY - 100, buttonWidth, buttonHeight, buttonFont, GameResources.BUTTON_TEXT, "Shampoo (15$)");
         buyEnergyButton = new Button(centerX, startY - 200, buttonWidth, buttonHeight, buttonFont, GameResources.BUTTON_TEXT, "Energy Potion (15$)");
 
@@ -72,9 +74,6 @@ public class ShopScreen extends BaseScreen {
         titleFont.setColor(Color.GOLD);
         layout.setText(titleFont, "SHOP");
         titleFont.draw(batch, "SHOP", (GameResources.SCREEN_WIDTH - layout.width) / 2f, GameResources.SCREEN_HEIGHT - 130);
-
-        priceFont.setColor(Color.GOLD);
-        layout.setText(priceFont, petEngine.getPet().getCoins() + " coins");
         priceFont.draw(batch, petEngine.getPet().getCoins() + " coins",
                 (GameResources.SCREEN_WIDTH - layout.width) / 2f, GameResources.SCREEN_HEIGHT - 170);
 
@@ -90,11 +89,11 @@ public class ShopScreen extends BaseScreen {
 
     @Override
     protected void handleInput() {
-        if (Gdx.input.justTouched()) {
-            Vector3 touchPos = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
-            if (screenManager instanceof MemeGotchi) {
-                ((MemeGotchi) screenManager).camera.unproject(touchPos);
-            }
+            if (Gdx.input.justTouched()) {
+                Vector3 touchPos = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
+                if (screenManager instanceof MemeGotchi) {
+                    BaseScreen.screenToWorld((MemeGotchi) screenManager, touchPos);
+                }
             int x = (int) touchPos.x;
             int y = (int) touchPos.y;
 
@@ -104,14 +103,13 @@ public class ShopScreen extends BaseScreen {
             }
             if (buyFoodButton.contains(x, y)) {
                 if (petEngine.getPet().getCoins() >= 5) {
-                    if (petEngine.getPet().getHunger() < 100) {
-                        petEngine.getPet().setCoins(petEngine.getPet().getCoins() - 5);
-                        petEngine.feed();
-                        if (screenManager instanceof MemeGotchi) {
-                            ((MemeGotchi) screenManager).getSoundManager().playCash();
-                        }
-                        showMessage("Yummy! +20 hunger");
-                    } else showMessage("I'm already full!");
+                    petEngine.getPet().setCoins(petEngine.getPet().getCoins() - 5);
+                    petEngine.getPet().addFood();
+                    if (screenManager instanceof MemeGotchi) {
+                        ((MemeGotchi) screenManager).getSoundManager().playCash();
+                    }
+                    screenManager.switchToLocation(BottomPanelButton.LocationType.KITCHEN);
+                    return;
                 } else showMessage("Not enough coins!");
 
             } else if (buyCleanButton.contains(x, y)) {

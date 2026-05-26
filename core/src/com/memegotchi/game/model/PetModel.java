@@ -12,6 +12,7 @@ public class PetModel {
     private long lastUpdateTime = System.currentTimeMillis();
     private List<String> fishInventory = new ArrayList<>();
     private int shampooCount = 0;
+    private int foodCount = 0;
     private boolean sleeping = false;
 
     public int getHunger() { return hunger; }
@@ -33,6 +34,8 @@ public class PetModel {
     public void setLastUpdateTime(long time) { this.lastUpdateTime = time; }
     public void setFishInventory(List<String> inventory) { this.fishInventory = inventory; }
     public void setShampooCount(int count) { this.shampooCount = Math.max(0, count); }
+    public int getFoodCount() { return foodCount; }
+    public void setFoodCount(int count) { this.foodCount = Math.max(0, count); }
 
     public void addFish(String fishName) {
         fishInventory.add(fishName);
@@ -59,5 +62,19 @@ public class PetModel {
 
     public boolean hasShampoo() {
         return shampooCount > 0;
+    }
+
+    public void addFood() {
+        foodCount++;
+    }
+
+    public boolean useFood() {
+        if (foodCount <= 0) return false;
+        foodCount--;
+        return true;
+    }
+
+    public boolean hasFood() {
+        return foodCount > 0;
     }
 }

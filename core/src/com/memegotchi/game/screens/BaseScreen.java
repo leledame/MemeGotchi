@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.utils.viewport.Viewport;
 import com.memegotchi.game.GameResources;
 import com.memegotchi.game.MemeGotchi;
 import com.memegotchi.game.buttons.BottomPanelButton;
@@ -185,6 +186,13 @@ public abstract class BaseScreen extends ScreenAdapter {
 
     protected void onScreenShow() {}
 
+    public static void screenToWorld(MemeGotchi game, com.badlogic.gdx.math.Vector3 coords) {
+        Viewport v = game.viewport;
+        float screenYFromBottom = Gdx.graphics.getHeight() - coords.y;
+        coords.x = (coords.x - v.getScreenX()) / v.getScreenWidth() * game.camera.viewportWidth;
+        coords.y = (screenYFromBottom - v.getScreenY()) / v.getScreenHeight() * game.camera.viewportHeight;
+    }
+
     protected void handleInput() {
         boolean isTouched = Gdx.input.isTouched();
         if (isTouched && !wasTouched) {
@@ -197,7 +205,8 @@ public abstract class BaseScreen extends ScreenAdapter {
 
             if (screenManager instanceof MemeGotchi) {
                 MemeGotchi game = (MemeGotchi) screenManager;
-                com.badlogic.gdx.math.Vector3 worldCoords = game.camera.unproject(new com.badlogic.gdx.math.Vector3(touchX, touchY, 0));
+                com.badlogic.gdx.math.Vector3 worldCoords = new com.badlogic.gdx.math.Vector3(touchX, touchY, 0);
+                screenToWorld(game, worldCoords);
                 touchX = (int) worldCoords.x;
                 touchY = (int) worldCoords.y;
             }
@@ -245,8 +254,6 @@ public abstract class BaseScreen extends ScreenAdapter {
     }
 
     protected void onCatTapped() {
-        petEngine.play();
-        showMessage("+15 happy, -5 energy, -5 hunger");
     }
 
     protected void onBottomPanelLocationChanged(BottomPanelButton.LocationType location) {

@@ -3,6 +3,7 @@ package com.memegotchi.game.screens;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.viewport.Viewport;
 import com.memegotchi.game.GameResources;
 import com.memegotchi.game.MemeGotchi;
 import com.memegotchi.game.buttons.Button;
@@ -95,7 +96,7 @@ public class BedroomScreen extends BaseScreen {
             if (Gdx.input.justTouched()) {
                 Vector3 touchPos = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
                 if (screenManager instanceof MemeGotchi) {
-                    ((MemeGotchi) screenManager).camera.unproject(touchPos);
+                    BaseScreen.screenToWorld((MemeGotchi) screenManager, touchPos);
                 }
                 if (sleepButton.contains((int) touchPos.x, (int) touchPos.y)) {
                     petEngine.sleep();

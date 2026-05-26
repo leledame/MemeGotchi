@@ -2,6 +2,7 @@ package com.memegotchi.game.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -47,6 +48,8 @@ public class FishingScreen extends BaseScreen {
 
     private Stage uiStage;
     private Stage catchUiStage;
+    private OrthographicCamera uiCamera;
+    private OrthographicCamera catchUiCamera;
     private TextButton startGameButton;
     private Image caughtFishImage;
     private Label catchMessageLabel;
@@ -109,6 +112,7 @@ public class FishingScreen extends BaseScreen {
 
     @Override
     protected void onCatTapped() {
+        if (!isFishingStarted) return;
         if (petEngine != null) petEngine.playFishing();
         showMessage("+1 happy, -2 hunger, -1 energy, -1 cleanliness");
     }
@@ -208,12 +212,16 @@ public class FishingScreen extends BaseScreen {
             }
         });
 
+        uiCamera = new OrthographicCamera();
+        uiCamera.setToOrtho(false, GameResources.SCREEN_WIDTH, GameResources.SCREEN_HEIGHT);
+        catchUiCamera = new OrthographicCamera();
+        catchUiCamera.setToOrtho(false, GameResources.SCREEN_WIDTH, GameResources.SCREEN_HEIGHT);
+
         if (screenManager instanceof MemeGotchi) {
-            MemeGotchi game = (MemeGotchi) screenManager;
-            uiStage = new Stage(new com.badlogic.gdx.utils.viewport.FitViewport(
-                    GameResources.SCREEN_WIDTH, GameResources.SCREEN_HEIGHT, game.camera));
-            catchUiStage = new Stage(new com.badlogic.gdx.utils.viewport.FitViewport(
-                    GameResources.SCREEN_WIDTH, GameResources.SCREEN_HEIGHT, game.camera));
+            uiStage = new Stage(new com.badlogic.gdx.utils.viewport.StretchViewport(
+                    GameResources.SCREEN_WIDTH, GameResources.SCREEN_HEIGHT, uiCamera));
+            catchUiStage = new Stage(new com.badlogic.gdx.utils.viewport.StretchViewport(
+                    GameResources.SCREEN_WIDTH, GameResources.SCREEN_HEIGHT, catchUiCamera));
         } else {
             uiStage = new Stage();
             catchUiStage = new Stage();

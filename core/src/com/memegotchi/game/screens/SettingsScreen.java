@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.utils.viewport.Viewport;
 import com.memegotchi.game.GameResources;
 import com.memegotchi.game.MemeGotchi;
 import com.memegotchi.game.buttons.Button;
@@ -92,7 +93,7 @@ public class SettingsScreen extends BaseScreen {
             }
             Vector3 touchPos = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
             if (screenManager instanceof MemeGotchi) {
-                ((MemeGotchi) screenManager).camera.unproject(touchPos);
+                BaseScreen.screenToWorld((MemeGotchi) screenManager, touchPos);
             }
             int x = (int) touchPos.x;
             int y = (int) touchPos.y;
