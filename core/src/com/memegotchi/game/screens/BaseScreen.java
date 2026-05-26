@@ -20,8 +20,9 @@ public abstract class BaseScreen extends ScreenAdapter {
     protected SpriteBatch batch;
     protected ShapeRenderer shapeRenderer;
     protected Texture backgroundTexture;
+    protected Texture nightBackgroundTexture;
     protected Texture currentCharacterTexture;
-    private Texture baseTexture, happyTexture, sadTexture, sleepyTexture;
+    private Texture baseTexture, happyTexture, sadTexture, sleepyTexture, sleepingTexture;
 
     protected float scale;
     protected Button moveButton;
@@ -73,6 +74,12 @@ public abstract class BaseScreen extends ScreenAdapter {
         backgroundTexture = new Texture(getBackgroundPath());
         backgroundTexture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
 
+        String nightPath = getNightBackgroundPath();
+        if (nightPath != null) {
+            nightBackgroundTexture = new Texture(nightPath);
+            nightBackgroundTexture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+        }
+
         baseTexture = new Texture("charachters/female_cat/" + getCharacterFolder() + "/base.png");
         happyTexture = new Texture("charachters/female_cat/" + getCharacterFolder() + "/happy.png");
         sadTexture = new Texture("charachters/female_cat/" + getCharacterFolder() + "/sad.png");
@@ -81,6 +88,10 @@ public abstract class BaseScreen extends ScreenAdapter {
         happyTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
         sadTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
         sleepyTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        if (hasSleepingTexture()) {
+            sleepingTexture = new Texture("charachters/female_cat/" + getCharacterFolder() + "/sleeping.png");
+            sleepingTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        }
         currentCharacterTexture = baseTexture;
 
         bottomPanel = new BottomPanel(WORLD_WIDTH, WORLD_HEIGHT, 1f);
@@ -115,6 +126,10 @@ public abstract class BaseScreen extends ScreenAdapter {
 
     private void updateCharacterEmotion() {
         if (petEngine == null) return;
+        if (petEngine.isSleeping()) {
+            if (sleepingTexture != null) currentCharacterTexture = sleepingTexture;
+            return;
+        }
         var pet = petEngine.getPet();
         if (pet.getEnergy() <= 20) {
             currentCharacterTexture = sleepyTexture;
@@ -190,13 +205,20 @@ public abstract class BaseScreen extends ScreenAdapter {
 
             boolean catIsHere = screenManager != null
                     && screenManager.getCurrentCatRoom() == getCatRoomState();
+            boolean catIsSleeping = petEngine != null && petEngine.isSleeping();
 
             if (!catIsHere && moveButton != null && moveButton.contains(touchX, touchY)) {
-                if (screenManager != null) {
-                    screenManager.setCatRoom(getCatRoomState());
+                if (!catIsSleeping || petEngine.getPet().getEnergy() >= 80) {
+                    if (screenManager != null) {
+                        if (catIsSleeping) {
+                            petEngine.wakeUp();
+                            onSleepEnd();
+                        }
+                        screenManager.setCatRoom(getCatRoomState());
+                    }
+                    wasTouched = isTouched;
+                    return;
                 }
-                wasTouched = isTouched;
-                return;
             }
 
             if (bottomPanel.handleTouch(touchX, touchY)) {
@@ -244,7 +266,13 @@ public abstract class BaseScreen extends ScreenAdapter {
                 && screenManager.getCurrentCatRoom() == getCatRoomState();
 
         batch.begin();
-        batch.draw(backgroundTexture, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
+
+        boolean catIsSleeping = petEngine != null && petEngine.isSleeping();
+        if (catIsSleeping && nightBackgroundTexture != null) {
+            batch.draw(nightBackgroundTexture, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
+        } else {
+            batch.draw(backgroundTexture, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
+        }
 
         if (catIsHere && shouldDrawCharacter() && currentCharacterTexture != null) {
             float scaleMul = getCharacterScaleMultiplier();
@@ -266,7 +294,11 @@ public abstract class BaseScreen extends ScreenAdapter {
         bottomPanel.render(batch, shapeRenderer);
         topPanel.render(batch, shapeRenderer);
 
-        if (!catIsHere && moveButton != null) {
+        boolean showMoveButton = !catIsHere && moveButton != null;
+        if (catIsSleeping) {
+            showMoveButton = showMoveButton && petEngine.getPet().getEnergy() >= 80;
+        }
+        if (showMoveButton) {
             batch.begin();
             moveButton.render(batch, false);
             batch.end();
@@ -292,10 +324,12 @@ public abstract class BaseScreen extends ScreenAdapter {
         if (batch != null) { batch.dispose(); batch = null; }
         if (shapeRenderer != null) { shapeRenderer.dispose(); shapeRenderer = null; }
         if (backgroundTexture != null) { backgroundTexture.dispose(); backgroundTexture = null; }
+        if (nightBackgroundTexture != null) { nightBackgroundTexture.dispose(); nightBackgroundTexture = null; }
         if (baseTexture != null) { baseTexture.dispose(); baseTexture = null; }
         if (happyTexture != null) { happyTexture.dispose(); happyTexture = null; }
         if (sadTexture != null) { sadTexture.dispose(); sadTexture = null; }
         if (sleepyTexture != null) { sleepyTexture.dispose(); sleepyTexture = null; }
+        if (sleepingTexture != null) { sleepingTexture.dispose(); sleepingTexture = null; }
         if (currentCharacterTexture != null) { currentCharacterTexture.dispose(); currentCharacterTexture = null; }
         if (bottomPanel != null) { bottomPanel.dispose(); bottomPanel = null; }
         if (topPanel != null) { topPanel.dispose(); topPanel = null; }
@@ -326,5 +360,31 @@ public abstract class BaseScreen extends ScreenAdapter {
 
     protected String getCharacterFolder() {
         return "living_room";
+    }
+
+    protected boolean hasSleepingTexture() {
+        return false;
+    }
+
+    public void startSleeping() {
+        onSleepStart();
+    }
+
+    protected void onSleepStart() {}
+
+    protected void onSleepEnd() {}
+
+    protected String getNightBackgroundPath() {
+        return null;
+    }
+
+    protected float getCharacterXShift() {
+        return 0f;
+    }
+
+    protected void setBackground(String path) {
+        if (backgroundTexture != null) backgroundTexture.dispose();
+        backgroundTexture = new Texture(path);
+        backgroundTexture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
     }
 }

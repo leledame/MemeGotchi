@@ -35,6 +35,11 @@ public class BathroomScreen extends BaseScreen {
     }
 
     @Override
+    protected String getNightBackgroundPath() {
+        return GameResources.BACKGROUND_BATHROOM_NIGHT;
+    }
+
+    @Override
     protected void onScreenShow() {
         super.onScreenShow();
         int btnW = 200;

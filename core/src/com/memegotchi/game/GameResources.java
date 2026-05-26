@@ -10,6 +10,11 @@ public class GameResources {
     public static final String BACKGROUND_KITCHEN_DAY = "backgronds/kitchen/day.png";
     public static final String BACKGROUND_BATHROOM_DAY = "backgronds/bathroom/day.png";
     public static final String BACKGROUND_FISHING_DAY = "backgronds/fishing/fishingday.png";
+    public static final String BACKGROUND_BEDROOM_NIGHT = "backgronds/bedroom/night.png";
+    public static final String BACKGROUND_LIVING_NIGHT = "backgronds/living_room/night.png";
+    public static final String BACKGROUND_KITCHEN_NIGHT = "backgronds/kitchen/night.png";
+    public static final String BACKGROUND_BATHROOM_NIGHT = "backgronds/bathroom/night.png";
+    public static final String BACKGROUND_FISHING_NIGHT = "backgronds/fishing/fishingnight.png";
     public static final String START = "backgronds/start/start_background.png";
 
     // Персонаж

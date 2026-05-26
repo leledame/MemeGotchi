@@ -8,9 +8,17 @@ public class PetEngine {
     private float accumulatedTime = 0;
 
     private static final float GAME_TICK = 2500f;
+    private static final float ENERGY_REGEN_RATE = 1f;
+
+    private float tickMultiplier = 1.0f;
+    private float energyRegenAccumulator = 0f;
 
     public PetEngine(PetModel pet) {
         this.pet = pet;
+    }
+
+    public void setTickMultiplier(float multiplier) {
+        this.tickMultiplier = multiplier;
     }
 
     public void updateOffline(long deltaMinutes) {
@@ -28,13 +36,28 @@ public class PetEngine {
     }
 
     public void update(float deltaSeconds) {
+        if (pet.isSleeping()) {
+            energyRegenAccumulator += ENERGY_REGEN_RATE * deltaSeconds;
+            if (energyRegenAccumulator >= 1f) {
+                int regen = (int) energyRegenAccumulator;
+                pet.setEnergy(pet.getEnergy() + regen);
+                energyRegenAccumulator -= regen;
+            }
+            if (pet.getEnergy() >= 100) {
+                pet.setSleeping(false);
+                energyRegenAccumulator = 0;
+            }
+        }
+
         accumulatedTime += deltaSeconds;
-        if (accumulatedTime >= GAME_TICK) {
-            accumulatedTime -= GAME_TICK;
+        if (accumulatedTime >= GAME_TICK * tickMultiplier) {
+            accumulatedTime -= GAME_TICK * tickMultiplier;
 
             pet.setHunger(pet.getHunger() - MathUtils.random(2, 5));
             pet.setHappiness(pet.getHappiness() - MathUtils.random(1, 3));
-            pet.setEnergy(pet.getEnergy() - MathUtils.random(1, 2));
+            if (!pet.isSleeping()) {
+                pet.setEnergy(pet.getEnergy() - MathUtils.random(1, 2));
+            }
             pet.setCleanliness(pet.getCleanliness() - MathUtils.random(1, 3));
 
             if (pet.getHunger() <= 0 || pet.getHappiness() <= 0) {
@@ -60,7 +83,15 @@ public class PetEngine {
     }
 
     public void sleep() {
-        pet.setEnergy(100);
+        pet.setSleeping(true);
+    }
+
+    public void wakeUp() {
+        pet.setSleeping(false);
+    }
+
+    public boolean isSleeping() {
+        return pet.isSleeping();
     }
 
     public PetModel getPet() {

@@ -25,4 +25,9 @@ public class LivingRoomScreen extends BaseScreen {
     public CatRoomState getCatRoomState() {
         return CatRoomState.LIVING;
     }
+
+    @Override
+    protected String getNightBackgroundPath() {
+        return GameResources.BACKGROUND_LIVING_NIGHT;
+    }
 }

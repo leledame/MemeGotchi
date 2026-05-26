@@ -49,6 +49,11 @@ public class KitchenScreen extends BaseScreen {
     }
 
     @Override
+    protected String getNightBackgroundPath() {
+        return GameResources.BACKGROUND_KITCHEN_NIGHT;
+    }
+
+    @Override
     protected void onScreenShow() {
         super.onScreenShow();
         int btnW = 200;

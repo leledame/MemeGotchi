@@ -24,7 +24,6 @@ public class FishingScreen extends BaseScreen {
     private static final float SIZE_MULTIPLIER = 5.0f;
     public enum FishPattern { NORMAL, FAST, VERY_FAST }
 
-    // ДОБАВЛЕНО: Поле name для названия рыбы
     public class FishData {
         public Texture texture;
         public FishPattern pattern;
@@ -104,16 +103,20 @@ public class FishingScreen extends BaseScreen {
     }
 
     @Override
+    protected String getNightBackgroundPath() {
+        return GameResources.BACKGROUND_FISHING_NIGHT;
+    }
+
+    @Override
     protected void onScreenShow() {
         super.onScreenShow();
+        if (petEngine != null) petEngine.setTickMultiplier(5.0f);
         isFishingStarted = false;
         isCatchScreenOpen = false;
         holdTimer = REQUIRED_HOLD_TIME / 4f;
         fishStartMoveY = 0f;
         currentMoveTime = 0f;
 
-        // Шрифт с чёрным цветом для контраста.
-        // ИЗМЕНЕНО: Масштаб увеличен с 3.5f до 4.0f, чтобы текст казался крупнее (имитация жирности).
         buttonFont = new BitmapFont();
         buttonFont.getData().setScale(3.5f);
         buttonFont.getRegion().getTexture().setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
@@ -131,7 +134,6 @@ public class FishingScreen extends BaseScreen {
         fishTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
         greenZoneTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
 
-        // ДОБАВЛЕНО: Массив с названиями рыб
         String[] fishNames = {
                 "Stone Fish", "Bread fish", "Herring",
                 "Sky Fish", "Purple Blowfish", "Plush Fish",
@@ -153,7 +155,6 @@ public class FishingScreen extends BaseScreen {
                 pattern = FishPattern.VERY_FAST;
                 price = MathUtils.random(50, 100);
             }
-            // ИЗМЕНЕНО: Передаем имя рыбы из массива
             fishes[i] = new FishData(tex, pattern, price, fishNames[i]);
         }
         currentFish = fishes[MathUtils.random(0, 8)];
@@ -174,7 +175,6 @@ public class FishingScreen extends BaseScreen {
             btnStyle.up = new TextureRegionDrawable(new TextureRegion(buttonTexture));
             btnStyle.down = btnStyle.up;
         } catch (Exception e) {
-            // Если текстуры нет, кнопка будет просто текстом
         }
         btnStyle.font = catchFont;
         btnStyle.fontColor = Color.WHITE;
@@ -341,7 +341,6 @@ public class FishingScreen extends BaseScreen {
             isCatchScreenOpen = true;
             caughtFishImage.setDrawable(new TextureRegionDrawable(new TextureRegion(currentFish.texture)));
 
-            // ИЗМЕНЕНО: Выводим название пойманной рыбы (в верхнем регистре) вместо "YOU CAUGHT A FISH!"
             catchMessageLabel.setText(currentFish.name.toUpperCase() + " CAUGHT!\nPRICE: " + currentFish.price + " COINS");
 
             Gdx.input.setInputProcessor(catchUiStage);
@@ -414,6 +413,7 @@ public class FishingScreen extends BaseScreen {
     public void hide() {
         super.hide();
         Gdx.input.setInputProcessor(null);
+        if (petEngine != null) petEngine.setTickMultiplier(1.0f);
     }
 
     @Override
