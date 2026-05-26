@@ -2,27 +2,25 @@ package com.memegotchi.game.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.memegotchi.game.FontBuilder;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
+import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.ScreenUtils;
 import com.memegotchi.game.GameResources;
 import com.memegotchi.game.MemeGotchi;
+import com.memegotchi.game.buttons.Button;
 import com.memegotchi.game.engine.PetEngine;
-import com.memegotchi.game.storage.GameStorage;
 
 public class SettingsScreen extends BaseScreen {
-    private Stage uiStage;
-    private Skin skin;
-    private Label musicLabel, soundLabel;
-    private TextButton musicButton, soundButton, backButton;
-    private boolean musicOn, soundOn;
-    private GameStorage storage;
+    private Button musicButton;
+    private Button soundButton;
+    private Button resetButton;
+    private Button backButton;
+    private BitmapFont titleFont;
+    private BitmapFont buttonFont;
+    private boolean musicOn = true;
+    private boolean soundOn = true;
 
     public SettingsScreen(PetEngine petEngine) {
         super(petEngine);
@@ -31,95 +29,142 @@ public class SettingsScreen extends BaseScreen {
     @Override
     public void show() {
         super.show();
-        storage = new GameStorage();
+
+        buttonFont = new BitmapFont();
+        buttonFont.getData().setScale(3.0f);
+        buttonFont.getRegion().getTexture().setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+
+        titleFont = new BitmapFont();
+        titleFont.getData().setScale(3.0f);
+        titleFont.getRegion().getTexture().setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+
+        com.memegotchi.game.storage.GameStorage storage = new com.memegotchi.game.storage.GameStorage();
         musicOn = storage.isMusicOn();
         soundOn = storage.isSoundOn();
 
-        uiStage = new Stage(new FitViewport(WORLD_WIDTH, WORLD_HEIGHT, ((MemeGotchi)screenManager).camera));
-        Gdx.input.setInputProcessor(uiStage);
+        int buttonWidth = 500;
+        int buttonHeight = 90;
+        int centerX = (GameResources.SCREEN_WIDTH - buttonWidth) / 2;
+        int startY = GameResources.SCREEN_HEIGHT - 300;
 
-        skin = new Skin();
-        // Простая текстурная кожа (можно создать через текстуру кнопки)
-        TextButton.TextButtonStyle textStyle = new TextButton.TextButtonStyle();
-        textStyle.font = FontBuilder.generate(36, Color.WHITE, "fonts/segoe-ui-emoji_0.ttf");
-        textStyle.up = textStyle.down = textStyle.over = null; // без текстуры, только текст
-        skin.add("default", textStyle);
+        backButton = new Button(25, GameResources.SCREEN_HEIGHT - 110, 280, 90, buttonFont, GameResources.BUTTON_TEXT, "BACK");
+        musicButton = new Button(centerX, startY, buttonWidth, buttonHeight, buttonFont, GameResources.BUTTON_TEXT, "Music: " + (musicOn ? "ON" : "OFF"));
+        soundButton = new Button(centerX, startY - 100, buttonWidth, buttonHeight, buttonFont, GameResources.BUTTON_TEXT, "Sounds: " + (soundOn ? "ON" : "OFF"));
+        resetButton = new Button(centerX, startY - 200, buttonWidth, buttonHeight, buttonFont, GameResources.BUTTON_TEXT, "Reset");
 
-        Table table = new Table();
-        table.setFillParent(true);
-        uiStage.addActor(table);
-
-        Label title = new Label("Settings", new Label.LabelStyle(FontBuilder.generate(60, Color.PINK, "fonts/segoe-ui-emoji_0.ttf"), Color.PINK));
-        table.add(title).padBottom(50).row();
-
-        musicLabel = new Label("Music: " + (musicOn ? "ON" : "OFF"), new Label.LabelStyle(FontBuilder.generate(40, Color.WHITE, "fonts/segoe-ui-emoji_0.ttf"), Color.WHITE));
-        musicButton = new TextButton("Toggle", textStyle);
-        musicButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                musicOn = !musicOn;
-                storage.saveMusicSettings(musicOn);
-                musicLabel.setText("Music: " + (musicOn ? "ON" : "OFF"));
-                if (screenManager instanceof MemeGotchi) {
-                    ((MemeGotchi) screenManager).updateMusic();
-                }
-            }
-        });
-        table.add(musicLabel).pad(10);
-        table.add(musicButton).pad(10).width(150).height(60);
-        table.row();
-
-        soundLabel = new Label("Sound: " + (soundOn ? "ON" : "OFF"), new Label.LabelStyle(FontBuilder.generate(40, Color.WHITE, "fonts/segoe-ui-emoji_0.ttf"), Color.WHITE));
-        soundButton = new TextButton("Toggle", textStyle);
-        soundButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                soundOn = !soundOn;
-                storage.saveSoundSettings(soundOn);
-                soundLabel.setText("Sound: " + (soundOn ? "ON" : "OFF"));
-                if (screenManager instanceof MemeGotchi) {
-                    ((MemeGotchi) screenManager).updateSound();
-                }
-            }
-        });
-        table.add(soundLabel).pad(10);
-        table.add(soundButton).pad(10).width(150).height(60);
-        table.row();
-
-        backButton = new TextButton("Back", textStyle);
-        backButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                screenManager.backToPreviousScreen();
-            }
-        });
-        table.add(backButton).colspan(2).padTop(50).width(200).height(80);
+        musicButton.getTexture().setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        soundButton.getTexture().setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        resetButton.getTexture().setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        backButton.getTexture().setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
     }
 
     @Override
     public void render(float delta) {
-        super.render(delta); // рисует фон и статы
-        if (uiStage != null) {
-            uiStage.act(delta);
-            uiStage.draw();
+        ScreenUtils.clear(0.2f, 0.2f, 0.3f, 1);
+
+        batch.begin();
+
+        if (backgroundTexture != null) {
+            batch.draw(backgroundTexture, 0, 0, GameResources.SCREEN_WIDTH, GameResources.SCREEN_HEIGHT);
+        }
+
+        GlyphLayout layout = new GlyphLayout();
+
+        titleFont.setColor(Color.GOLD);
+        layout.setText(titleFont, "SETTINGS");
+        titleFont.draw(batch, "SETTINGS", (GameResources.SCREEN_WIDTH - layout.width) / 2f, GameResources.SCREEN_HEIGHT - 130);
+
+        musicButton.render(batch, false);
+        soundButton.render(batch, false);
+        resetButton.render(batch, false);
+        backButton.render(batch, false);
+
+        batch.end();
+
+        handleInput();
+    }
+
+    @Override
+    protected void handleInput() {
+        if (Gdx.input.justTouched()) {
+            if (screenManager instanceof MemeGotchi) {
+                ((MemeGotchi) screenManager).getSoundManager().playClick();
+            }
+            Vector3 touchPos = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
+            if (screenManager instanceof MemeGotchi) {
+                ((MemeGotchi) screenManager).camera.unproject(touchPos);
+            }
+            int x = (int) touchPos.x;
+            int y = (int) touchPos.y;
+
+            if (backButton != null && backButton.contains(x, y) && screenManager != null) {
+                screenManager.backToPreviousScreen();
+                return;
+            }
+            if (musicButton != null && musicButton.contains(x, y)) {
+                musicOn = !musicOn;
+                com.memegotchi.game.storage.GameStorage storage = new com.memegotchi.game.storage.GameStorage();
+                storage.saveMusicSettings(musicOn);
+                musicButton.setText("Music: " + (musicOn ? "ON" : "OFF"), buttonFont);
+                if (screenManager instanceof MemeGotchi) {
+                    ((MemeGotchi) screenManager).updateMusic();
+                }
+                return;
+            }
+            if (soundButton != null && soundButton.contains(x, y)) {
+                soundOn = !soundOn;
+                com.memegotchi.game.storage.GameStorage storage = new com.memegotchi.game.storage.GameStorage();
+                storage.saveSoundSettings(soundOn);
+                soundButton.setText("Sounds: " + (soundOn ? "ON" : "OFF"), buttonFont);
+                if (screenManager instanceof MemeGotchi) {
+                    ((MemeGotchi) screenManager).updateSound();
+                }
+                return;
+            }
+            if (resetButton != null && resetButton.contains(x, y)) {
+                com.memegotchi.game.storage.GameStorage storage = new com.memegotchi.game.storage.GameStorage();
+                storage.clear();
+                if (petEngine != null) {
+                    petEngine.getPet().setHunger(100);
+                    petEngine.getPet().setHappiness(100);
+                    petEngine.getPet().setEnergy(100);
+                    petEngine.getPet().setCleanliness(100);
+                    petEngine.getPet().setCoins(100);
+                }
+                showMessage("Game reset!");
+                return;
+            }
         }
     }
 
     @Override
-    public void hide() {
-        super.hide();
-        if (uiStage != null) Gdx.input.setInputProcessor(null);
+    public String getBackgroundPath() {
+        return GameResources.BACKGROUND_DAY;
+    }
+
+    @Override
+    public String getCharacterPath() {
+        return GameResources.CHARACTER_BASE;
+    }
+
+    @Override
+    public boolean shouldDrawCharacter() {
+        return false;
+    }
+
+    @Override
+    protected void onScreenShow() {
+    }
+
+    @Override
+    public CatRoomState getCatRoomState() {
+        return null;
     }
 
     @Override
     public void dispose() {
         super.dispose();
-        if (uiStage != null) uiStage.dispose();
-        if (skin != null) skin.dispose();
+        if (titleFont != null) titleFont.dispose();
+        if (buttonFont != null) buttonFont.dispose();
     }
-
-    @Override public String getBackgroundPath() { return GameResources.BACKGROUND_DAY; }
-    @Override public String getCharacterPath() { return GameResources.CHARACTER_BASE; }
-    @Override public boolean shouldDrawCharacter() { return true; }
-    @Override public CatRoomState getCatRoomState() { return CatRoomState.LIVING; }
 }

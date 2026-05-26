@@ -64,7 +64,7 @@ public class GameResources {
             return TOP_BUTTONS_PATH + "shop.png";
         }
         if (menu == TopPanel.TopMenuType.SETTINGS) {
-            return TOP_BUTTONS_PATH + "settings.png";
+            return TOP_BUTTONS_PATH + "setting_button.png";
         }
         return null;
     }

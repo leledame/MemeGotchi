@@ -108,6 +108,12 @@ public class FishingScreen extends BaseScreen {
     }
 
     @Override
+    protected void onCatTapped() {
+        if (petEngine != null) petEngine.playFishing();
+        showMessage("+1 happy, -2 hunger, -1 energy, -1 cleanliness");
+    }
+
+    @Override
     protected void onScreenShow() {
         super.onScreenShow();
         if (petEngine != null) petEngine.setTickMultiplier(5.0f);
@@ -191,6 +197,9 @@ public class FishingScreen extends BaseScreen {
                 currentFish = fishes[MathUtils.random(0, 8)];
                 isFishingStarted = true;
                 startGameButton.setVisible(false);
+                if (screenManager instanceof MemeGotchi) {
+                    ((MemeGotchi) screenManager).getSoundManager().playFishingStart();
+                }
                 float baseScale = scale * SIZE_MULTIPLIER;
                 float fishHalfHeight = (fishTexture.getHeight() * baseScale) / 2f;
                 fishY = frameBottomY + fishHalfHeight;
@@ -318,6 +327,9 @@ public class FishingScreen extends BaseScreen {
             holdTimer = REQUIRED_HOLD_TIME / 4f;
             if (startGameButton != null) startGameButton.setVisible(true);
             Gdx.input.setInputProcessor(uiStage);
+            if (screenManager instanceof MemeGotchi) {
+                ((MemeGotchi) screenManager).getSoundManager().playFishingStop();
+            }
             batch.end();
             return;
         }
@@ -344,6 +356,9 @@ public class FishingScreen extends BaseScreen {
             catchMessageLabel.setText(currentFish.name.toUpperCase() + " CAUGHT!\nPRICE: " + currentFish.price + " COINS");
 
             Gdx.input.setInputProcessor(catchUiStage);
+            if (screenManager instanceof MemeGotchi) {
+                ((MemeGotchi) screenManager).getSoundManager().playFishingStop();
+            }
         }
     }
 

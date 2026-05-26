@@ -94,7 +94,17 @@ public class MemeGotchi extends Game implements ScreenManager {
 
         soundManager = new SoundManager();
         soundManager.loadSettings(storage.isMusicOn(), storage.isSoundOn());
-        if (storage.isMusicOn()) soundManager.playBackground();
+
+        petEngine.setSleepListener(new PetEngine.SleepListener() {
+            @Override
+            public void onSleepStart() {
+                soundManager.setSleeping(true);
+            }
+            @Override
+            public void onSleepEnd() {
+                soundManager.setSleeping(false);
+            }
+        });
 
 
 
@@ -109,6 +119,10 @@ public class MemeGotchi extends Game implements ScreenManager {
             currentScreen = settingsScreen;
         }
     }
+    public SoundManager getSoundManager() {
+        return soundManager;
+    }
+
     public void updateMusic() {
         if (soundManager != null) soundManager.setMusicEnabled(storage.isMusicOn());
     }

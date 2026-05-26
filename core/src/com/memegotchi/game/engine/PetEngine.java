@@ -4,8 +4,14 @@ import com.badlogic.gdx.math.MathUtils;
 import com.memegotchi.game.model.PetModel;
 
 public class PetEngine {
+    public interface SleepListener {
+        void onSleepStart();
+        void onSleepEnd();
+    }
+
     private PetModel pet;
     private float accumulatedTime = 0;
+    private SleepListener sleepListener;
 
     private static final float GAME_TICK = 2500f;
     private static final float ENERGY_REGEN_RATE = 1f;
@@ -15,6 +21,10 @@ public class PetEngine {
 
     public PetEngine(PetModel pet) {
         this.pet = pet;
+    }
+
+    public void setSleepListener(SleepListener listener) {
+        this.sleepListener = listener;
     }
 
     public void setTickMultiplier(float multiplier) {
@@ -45,6 +55,7 @@ public class PetEngine {
             }
             if (pet.getEnergy() >= 100) {
                 pet.setSleeping(false);
+                if (sleepListener != null) sleepListener.onSleepEnd();
                 energyRegenAccumulator = 0;
             }
         }
@@ -66,6 +77,13 @@ public class PetEngine {
         }
     }
 
+    public void playFishing() {
+        pet.setHappiness(Math.min(100, pet.getHappiness() + 1));
+        pet.setEnergy(Math.max(0, pet.getEnergy() - 1));
+        pet.setHunger(Math.max(0, pet.getHunger() - 2));
+        pet.setCleanliness(Math.max(0, pet.getCleanliness() - 1));
+    }
+
     public void feed() {
         pet.setHunger(Math.min(100, pet.getHunger() + 20));
         pet.setHappiness(Math.min(100, pet.getHappiness() + 5));
@@ -84,10 +102,12 @@ public class PetEngine {
 
     public void sleep() {
         pet.setSleeping(true);
+        if (sleepListener != null) sleepListener.onSleepStart();
     }
 
     public void wakeUp() {
         pet.setSleeping(false);
+        if (sleepListener != null) sleepListener.onSleepEnd();
     }
 
     public boolean isSleeping() {

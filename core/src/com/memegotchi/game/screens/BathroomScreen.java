@@ -73,6 +73,9 @@ public class BathroomScreen extends BaseScreen {
                 }
                 if (washButton.contains((int) touchPos.x, (int) touchPos.y)) {
                     if (petEngine.getPet().useShampoo()) {
+                        if (screenManager instanceof MemeGotchi) {
+                            ((MemeGotchi) screenManager).getSoundManager().playWash();
+                        }
                         int clean = Math.min(100, petEngine.getPet().getCleanliness() + 80);
                         petEngine.getPet().setCleanliness(clean);
                         showMessage("+80 cleanliness!");

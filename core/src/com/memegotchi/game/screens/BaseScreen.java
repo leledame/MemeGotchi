@@ -188,6 +188,10 @@ public abstract class BaseScreen extends ScreenAdapter {
     protected void handleInput() {
         boolean isTouched = Gdx.input.isTouched();
         if (isTouched && !wasTouched) {
+            if (screenManager instanceof MemeGotchi) {
+                ((MemeGotchi) screenManager).getSoundManager().playClick();
+            }
+
             int touchX = Gdx.input.getX();
             int touchY = Gdx.input.getY();
 
@@ -233,12 +237,16 @@ public abstract class BaseScreen extends ScreenAdapter {
                 int touchArea = 300;
                 if (touchX > centerX - touchArea && touchX < centerX + touchArea &&
                         touchY > centerY - touchArea && touchY < centerY + touchArea) {
-                    petEngine.play();
-                    showMessage("+15 happy, -5 energy, -5 hunger");
+                    onCatTapped();
                 }
             }
         }
         wasTouched = isTouched;
+    }
+
+    protected void onCatTapped() {
+        petEngine.play();
+        showMessage("+15 happy, -5 energy, -5 hunger");
     }
 
     protected void onBottomPanelLocationChanged(BottomPanelButton.LocationType location) {

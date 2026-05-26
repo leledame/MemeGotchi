@@ -107,6 +107,9 @@ public class ShopScreen extends BaseScreen {
                     if (petEngine.getPet().getHunger() < 100) {
                         petEngine.getPet().setCoins(petEngine.getPet().getCoins() - 5);
                         petEngine.feed();
+                        if (screenManager instanceof MemeGotchi) {
+                            ((MemeGotchi) screenManager).getSoundManager().playCash();
+                        }
                         showMessage("Yummy! +20 hunger");
                     } else showMessage("I'm already full!");
                 } else showMessage("Not enough coins!");
@@ -115,17 +118,22 @@ public class ShopScreen extends BaseScreen {
                 if (petEngine.getPet().getCoins() >= 15) {
                     petEngine.getPet().setCoins(petEngine.getPet().getCoins() - 15);
                     petEngine.getPet().addShampoo();
+                    if (screenManager instanceof MemeGotchi) {
+                        ((MemeGotchi) screenManager).getSoundManager().playCash();
+                    }
                     showMessage("+1 Shampoo!");
                 } else {
                     showMessage("Not enough coins!");
                 }
 
-                // В методе handleInput() блока buyEnergyButton
             } else if (buyEnergyButton.contains(x, y)) {
                 if (petEngine.getPet().getCoins() >= 15) {
                     if (petEngine.getPet().getEnergy() < 100) {
                         petEngine.getPet().setCoins(petEngine.getPet().getCoins() - 15);
-                        petEngine.sleep();   // ← теперь энергия станет 100
+                        petEngine.getPet().setEnergy(100);
+                        if (screenManager instanceof MemeGotchi) {
+                            ((MemeGotchi) screenManager).getSoundManager().playCash();
+                        }
                         showMessage("Energy restored to 100%!");
                     } else {
                         showMessage("Already full energy!");

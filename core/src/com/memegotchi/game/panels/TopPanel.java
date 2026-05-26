@@ -8,10 +8,6 @@ import com.memegotchi.game.buttons.TopButton;
 import com.memegotchi.game.screens.BaseScreen;
 import com.memegotchi.game.screens.ScreenManager;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
-
 public class TopPanel extends Panel {
     public enum TopMenuType {
         SHOP, SETTINGS
@@ -22,11 +18,6 @@ public class TopPanel extends Panel {
     private TopButton settingsButton;
     private ScreenManager screenManager;
     private BitmapFont font;
-    private BitmapFont timeFont;
-
-    private String timeString = "";
-    private long lastTimeUpdate = 0;
-    private SimpleDateFormat timeFormat;
 
     public TopPanel(int screenWidth, int screenHeight, float scale, BaseScreen parent, ScreenManager sm) {
         super(screenWidth, screenHeight, scale, false);
@@ -34,21 +25,13 @@ public class TopPanel extends Panel {
         initButtons();
         font = new BitmapFont();
         font.getData().setScale(1.5f);
-        timeFont = new BitmapFont();
-        timeFont.getData().setScale(1.2f);
-        timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
-        updateTimeString();
     }
 
     private void initButtons() {
         int btnSize = (int) (panelHeight * 0.6f);
         int btnY = panelY + (panelHeight - btnSize) / 2;
+        settingsButton = new TopButton(10, btnY, btnSize, btnSize, TopMenuType.SETTINGS);
         shopButton = new TopButton(screenWidth - btnSize - 10, btnY, btnSize, btnSize, TopMenuType.SHOP);
-        settingsButton = new TopButton(screenWidth - btnSize * 2 - 20, btnY, btnSize, btnSize, TopMenuType.SETTINGS);
-    }
-
-    private void updateTimeString() {
-        timeString = timeFormat.format(new Date());
     }
 
     @Override
@@ -63,14 +46,6 @@ public class TopPanel extends Panel {
         shapeRenderer.end();
 
         batch.begin();
-
-        long now = System.currentTimeMillis();
-        if (now - lastTimeUpdate >= 1000) {
-            lastTimeUpdate = now;
-            updateTimeString();
-        }
-        timeFont.setColor(Color.WHITE);
-        timeFont.draw(batch, timeString, 15, screenHeight - 25);
 
         if (shopButton != null) shopButton.render(batch, false);
         if (settingsButton != null) settingsButton.render(batch, false);
@@ -93,7 +68,6 @@ public class TopPanel extends Panel {
     @Override
     public void dispose() {
         if (font != null) font.dispose();
-        if (timeFont != null) timeFont.dispose();
         if (shopButton != null) shopButton.dispose();
         if (settingsButton != null) settingsButton.dispose();
     }

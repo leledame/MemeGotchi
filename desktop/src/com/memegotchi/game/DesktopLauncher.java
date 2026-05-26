@@ -10,7 +10,7 @@ public class DesktopLauncher {
 		Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
 		config.setTitle("MemeGotchi");
 		config.setWindowedMode(GameResources.SCREEN_WIDTH / 2, GameResources.SCREEN_HEIGHT / 2);
-		config.disableAudio(true);
+		config.disableAudio(false);
 		new Lwjgl3Application(new MemeGotchi(), config);
 	}
 }
