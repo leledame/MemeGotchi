@@ -1,7 +1,6 @@
 package com.memegotchi.game.panels;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -14,6 +13,10 @@ import java.util.Date;
 import java.util.Locale;
 
 public class TopPanel extends Panel {
+    public enum TopMenuType {
+        SHOP, SETTINGS
+    }
+
     private static final float BORDER_SCALE = 18f;
     private TopButton shopButton;
     private TopButton settingsButton;
@@ -25,8 +28,6 @@ public class TopPanel extends Panel {
     private long lastTimeUpdate = 0;
     private SimpleDateFormat timeFormat;
 
-    public enum TopMenuType { SHOP, SETTINGS }
-
     public TopPanel(int screenWidth, int screenHeight, float scale, BaseScreen parent, ScreenManager sm) {
         super(screenWidth, screenHeight, scale, false);
         this.screenManager = sm;
@@ -34,48 +35,20 @@ public class TopPanel extends Panel {
         font = new BitmapFont();
         font.getData().setScale(1.5f);
         timeFont = new BitmapFont();
-        timeFont.getData().setScale(1.8f);
+        timeFont.getData().setScale(1.2f);
         timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
         updateTimeString();
     }
 
     private void initButtons() {
-        if (shopButton != null) shopButton.dispose();
-        if (settingsButton != null) settingsButton.dispose();
-
-        int buttonSize = (int)(panelHeight * 0.7f);
-        int spacing = 20;
-        int shopX = screenWidth - buttonSize - spacing;
-        int settingsX = shopX - buttonSize - spacing;
-        int buttonY = panelY + (panelHeight - buttonSize) / 2;
-
-        shopButton = new TopButton(shopX, buttonY, buttonSize, buttonSize, TopMenuType.SHOP);
-        settingsButton = new TopButton(settingsX, buttonY, buttonSize, buttonSize, TopMenuType.SETTINGS);
+        int btnSize = (int) (panelHeight * 0.6f);
+        int btnY = panelY + (panelHeight - btnSize) / 2;
+        shopButton = new TopButton(screenWidth - btnSize - 10, btnY, btnSize, btnSize, TopMenuType.SHOP);
+        settingsButton = new TopButton(screenWidth - btnSize * 2 - 20, btnY, btnSize, btnSize, TopMenuType.SETTINGS);
     }
 
     private void updateTimeString() {
         timeString = timeFormat.format(new Date());
-    }
-
-    public boolean handleTouch(int touchX, int touchY) {
-        if (shopButton != null && shopButton.contains(touchX, touchY)) {
-            if (screenManager != null) screenManager.switchToShop();
-            return true;
-        }
-        if (settingsButton != null && settingsButton.contains(touchX, touchY)) {
-            if (screenManager != null) screenManager.switchToSettings();
-            return true;
-        }
-        return false;
-    }
-
-    public void resize(int width, int height, float scale) {
-        this.screenWidth = width;
-        this.screenHeight = height;
-        this.scale = scale;
-        this.panelHeight = (int) (screenHeight * PANEL_SIZE_PERCENT);
-        this.panelY = screenHeight - panelHeight;
-        initButtons();
     }
 
     @Override
@@ -91,7 +64,6 @@ public class TopPanel extends Panel {
 
         batch.begin();
 
-        // Часы
         long now = System.currentTimeMillis();
         if (now - lastTimeUpdate >= 1000) {
             lastTimeUpdate = now;
@@ -100,19 +72,29 @@ public class TopPanel extends Panel {
         timeFont.setColor(Color.WHITE);
         timeFont.draw(batch, timeString, 15, screenHeight - 25);
 
-
-        // Кнопки
         if (shopButton != null) shopButton.render(batch, false);
         if (settingsButton != null) settingsButton.render(batch, false);
 
         batch.end();
     }
 
+    public boolean handleTouch(int touchX, int touchY) {
+        if (shopButton != null && shopButton.contains(touchX, touchY) && screenManager != null) {
+            screenManager.switchToShop();
+            return true;
+        }
+        if (settingsButton != null && settingsButton.contains(touchX, touchY) && screenManager != null) {
+            screenManager.switchToSettings();
+            return true;
+        }
+        return false;
+    }
+
     @Override
     public void dispose() {
-        if (shopButton != null) shopButton.dispose();
-        if (settingsButton != null) settingsButton.dispose();
         if (font != null) font.dispose();
         if (timeFont != null) timeFont.dispose();
+        if (shopButton != null) shopButton.dispose();
+        if (settingsButton != null) settingsButton.dispose();
     }
 }

@@ -2,23 +2,24 @@ package com.memegotchi.game.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.memegotchi.game.GameResources;
+import com.memegotchi.game.MemeGotchi;
 import com.memegotchi.game.buttons.Button;
 import com.memegotchi.game.engine.PetEngine;
-import com.memegotchi.game.model.PetModel;
 
 public class ShopScreen extends BaseScreen {
     private Button backButton;
     private Button buyFoodButton;
-    private Button buyToyButton;
     private Button buyCleanButton;
     private Button buyEnergyButton;
     private BitmapFont titleFont;
     private BitmapFont priceFont;
     private BitmapFont buttonFont;
-    PetModel pet;
 
     public ShopScreen(PetEngine petEngine) {
         super(petEngine);
@@ -30,12 +31,15 @@ public class ShopScreen extends BaseScreen {
 
         buttonFont = new BitmapFont();
         buttonFont.getData().setScale(3.0f);
+        buttonFont.getRegion().getTexture().setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
 
         titleFont = new BitmapFont();
         titleFont.getData().setScale(3.0f);
+        titleFont.getRegion().getTexture().setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
 
         priceFont = new BitmapFont();
         priceFont.getData().setScale(1.8f);
+        priceFont.getRegion().getTexture().setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
 
         int buttonWidth = 500;
         int buttonHeight = 90;
@@ -44,9 +48,13 @@ public class ShopScreen extends BaseScreen {
 
         backButton = new Button(25, GameResources.SCREEN_HEIGHT - 110, 280, 90, buttonFont, GameResources.BUTTON_TEXT, "BACK");
         buyFoodButton = new Button(centerX, startY, buttonWidth, buttonHeight, buttonFont, GameResources.BUTTON_TEXT, "Food (10$)");
-        buyToyButton = new Button(centerX, startY - 100, buttonWidth, buttonHeight, buttonFont, GameResources.BUTTON_TEXT, "Toy (20$)");
-        buyCleanButton = new Button(centerX, startY - 200, buttonWidth, buttonHeight, buttonFont, GameResources.BUTTON_TEXT, "Shampoo (15$)");
-        buyEnergyButton = new Button(centerX, startY - 300, buttonWidth, buttonHeight, buttonFont, GameResources.BUTTON_TEXT, "Borosti potion (15$)");
+        buyCleanButton = new Button(centerX, startY - 100, buttonWidth, buttonHeight, buttonFont, GameResources.BUTTON_TEXT, "Shampoo (15$)");
+        buyEnergyButton = new Button(centerX, startY - 200, buttonWidth, buttonHeight, buttonFont, GameResources.BUTTON_TEXT, "Energy Potion (15$)");
+
+        buyFoodButton.getTexture().setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        buyCleanButton.getTexture().setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        buyEnergyButton.getTexture().setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        backButton.getTexture().setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
     }
 
     @Override
@@ -55,20 +63,22 @@ public class ShopScreen extends BaseScreen {
 
         batch.begin();
 
-        // Фон магазина
         if (backgroundTexture != null) {
             batch.draw(backgroundTexture, 0, 0, GameResources.SCREEN_WIDTH, GameResources.SCREEN_HEIGHT);
         }
 
+        GlyphLayout layout = new GlyphLayout();
+
         titleFont.setColor(Color.GOLD);
-        titleFont.draw(batch, "SHOP", GameResources.SCREEN_WIDTH / 2f - 100, GameResources.SCREEN_HEIGHT - 130);
+        layout.setText(titleFont, "SHOP");
+        titleFont.draw(batch, "SHOP", (GameResources.SCREEN_WIDTH - layout.width) / 2f, GameResources.SCREEN_HEIGHT - 130);
 
         priceFont.setColor(Color.GOLD);
+        layout.setText(priceFont, petEngine.getPet().getCoins() + " coins");
         priceFont.draw(batch, petEngine.getPet().getCoins() + " coins",
-                GameResources.SCREEN_WIDTH / 2f - 80, GameResources.SCREEN_HEIGHT - 170);
+                (GameResources.SCREEN_WIDTH - layout.width) / 2f, GameResources.SCREEN_HEIGHT - 170);
 
         buyFoodButton.render(batch, false);
-        buyToyButton.render(batch, false);
         buyCleanButton.render(batch, false);
         buyEnergyButton.render(batch, false);
         backButton.render(batch, false);
@@ -81,8 +91,12 @@ public class ShopScreen extends BaseScreen {
     @Override
     protected void handleInput() {
         if (Gdx.input.justTouched()) {
-            int x = Gdx.input.getX();
-            int y = GameResources.SCREEN_HEIGHT - Gdx.input.getY();
+            Vector3 touchPos = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
+            if (screenManager instanceof MemeGotchi) {
+                ((MemeGotchi) screenManager).camera.unproject(touchPos);
+            }
+            int x = (int) touchPos.x;
+            int y = (int) touchPos.y;
 
             if (backButton.contains(x, y) && screenManager != null) {
                 screenManager.backToPreviousScreen();
@@ -97,28 +111,13 @@ public class ShopScreen extends BaseScreen {
                     } else showMessage("I'm already full!");
                 } else showMessage("Not enough coins!");
 
-            } else if (buyToyButton.contains(x, y)) {
-                if (petEngine.getPet().getCoins() >= 20) {
-                    if (petEngine.getPet().getHappiness() < 100) {
-                        petEngine.getPet().setCoins(petEngine.getPet().getCoins() - 20);
-                        petEngine.play();
-                    }
-                    else {
-                        showMessage("Я наигрался!");
-                    }
-
-                }
-
             } else if (buyCleanButton.contains(x, y)) {
                 if (petEngine.getPet().getCoins() >= 15) {
-                    if (petEngine.getPet().getCleanliness() < 100) {
-                        petEngine.getPet().setCoins(petEngine.getPet().getCoins() - 15);
-                        petEngine.clean();
-                    }
-                    else {
-                        showMessage("Я чистенький!");
-                    }
-
+                    petEngine.getPet().setCoins(petEngine.getPet().getCoins() - 15);
+                    petEngine.getPet().addShampoo();
+                    showMessage("+1 Shampoo!");
+                } else {
+                    showMessage("Not enough coins!");
                 }
 
                 // В методе handleInput() блока buyEnergyButton

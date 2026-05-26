@@ -7,7 +7,7 @@ public class PetEngine {
     private PetModel pet;
     private float accumulatedTime = 0;
 
-    private static final float GAME_TICK = 15f;
+    private static final float GAME_TICK = 2500f;
 
     public PetEngine(PetModel pet) {
         this.pet = pet;

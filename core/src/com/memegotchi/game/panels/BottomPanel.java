@@ -34,7 +34,7 @@ public class BottomPanel extends Panel {
                 BottomPanelButton.LocationType.BEDROOM
         };
 
-        int buttonSize = (int) (panelHeight * 0.6f);
+        int buttonSize = (int) (panelHeight *   0.6f);
         int slotWidth = screenWidth / BUTTON_COUNT;
         int buttonY = panelY + (panelHeight - buttonSize) / 2;
 

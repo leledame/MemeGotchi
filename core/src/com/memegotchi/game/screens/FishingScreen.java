@@ -77,6 +77,7 @@ public class FishingScreen extends BaseScreen {
     private float currentMoveTime = 0f;
 
     private BitmapFont buttonFont;
+    private BitmapFont catchFont;
 
     public FishingScreen(PetEngine petEngine) {
         super(petEngine);
@@ -114,8 +115,13 @@ public class FishingScreen extends BaseScreen {
         // Шрифт с чёрным цветом для контраста.
         // ИЗМЕНЕНО: Масштаб увеличен с 3.5f до 4.0f, чтобы текст казался крупнее (имитация жирности).
         buttonFont = new BitmapFont();
-        buttonFont.getData().setScale(4.0f);
-        buttonFont.setColor(Color.BLACK);
+        buttonFont.getData().setScale(3.5f);
+        buttonFont.getRegion().getTexture().setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+
+        catchFont = new BitmapFont();
+        catchFont.getData().setScale(4.0f);
+        catchFont.setColor(Color.WHITE);
+        catchFont.getRegion().getTexture().setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
 
         gameFishingBackgroundTexture = new Texture("backgronds/fishing/gamefish.png");
         fishTexture = new Texture("backgronds/fishing/fish_for_game.png");
@@ -170,8 +176,8 @@ public class FishingScreen extends BaseScreen {
         } catch (Exception e) {
             // Если текстуры нет, кнопка будет просто текстом
         }
-        btnStyle.font = buttonFont;
-        btnStyle.fontColor = Color.BLACK;
+        btnStyle.font = catchFont;
+        btnStyle.fontColor = Color.WHITE;
 
         startGameButton = new TextButton("START", btnStyle);
         startGameButton.setSize(280, 90);
@@ -205,7 +211,7 @@ public class FishingScreen extends BaseScreen {
         }
         uiStage.addActor(startGameButton);
 
-        Label.LabelStyle labelStyle = new Label.LabelStyle(buttonFont, Color.WHITE);
+        Label.LabelStyle labelStyle = new Label.LabelStyle(catchFont, Color.WHITE);
         catchMessageLabel = new Label("", labelStyle);
         catchMessageLabel.setAlignment(Align.center);
         catchMessageLabel.setPosition(0, 600);
@@ -215,7 +221,18 @@ public class FishingScreen extends BaseScreen {
         caughtFishImage.setSize(200, 200);
         caughtFishImage.setPosition((GameResources.SCREEN_WIDTH - 200) / 2f, 380);
 
-        TextButton sellButton = new TextButton("SELL", btnStyle);
+        TextButtonStyle catchBtnStyle = new TextButtonStyle();
+        try {
+            Texture catchBtnTexture = new Texture("buttons/text_button/button.png");
+            catchBtnTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+            catchBtnStyle.up = new TextureRegionDrawable(new TextureRegion(catchBtnTexture));
+            catchBtnStyle.down = catchBtnStyle.up;
+        } catch (Exception e) {
+        }
+        catchBtnStyle.font = catchFont;
+        catchBtnStyle.fontColor = Color.WHITE;
+
+        TextButton sellButton = new TextButton("SELL", catchBtnStyle);
         sellButton.setSize(200, 80);
         sellButton.setPosition(GameResources.SCREEN_WIDTH / 2f + 20, 260);
         sellButton.addListener(new ClickListener() {
@@ -228,21 +245,25 @@ public class FishingScreen extends BaseScreen {
             }
         });
 
-        TextButton eatButton = new TextButton("EAT", btnStyle);
-        eatButton.setSize(200, 80);
-        eatButton.setPosition(GameResources.SCREEN_WIDTH / 2f - 220, 260);
-        eatButton.addListener(new ClickListener() {
+        TextButton lootButton = new TextButton("LOOT", catchBtnStyle);
+        lootButton.setSize(200, 80);
+        lootButton.setPosition(GameResources.SCREEN_WIDTH / 2f - 220, 260);
+        lootButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                if (petEngine != null) petEngine.feed();
-                if (screenManager != null) screenManager.backToPreviousScreen();
+                if (petEngine != null && petEngine.getPet() != null && currentFish != null) {
+                    petEngine.getPet().addFish(currentFish.name);
+                }
+                if (screenManager != null) {
+                    screenManager.backToPreviousScreen();
+                }
             }
         });
 
         catchUiStage.addActor(catchMessageLabel);
         catchUiStage.addActor(caughtFishImage);
         catchUiStage.addActor(sellButton);
-        catchUiStage.addActor(eatButton);
+        catchUiStage.addActor(lootButton);
     }
 
     @Override
@@ -255,7 +276,10 @@ public class FishingScreen extends BaseScreen {
             return;
         }
 
-        if (!isFishingStarted && uiStage != null) {
+        boolean catIsHere = screenManager != null
+                && screenManager.getCurrentCatRoom() == getCatRoomState();
+
+        if (!isFishingStarted && uiStage != null && catIsHere) {
             uiStage.act(delta);
             uiStage.draw();
         }
@@ -403,6 +427,7 @@ public class FishingScreen extends BaseScreen {
             }
         }
         if (buttonFont != null) buttonFont.dispose();
+        if (catchFont != null) catchFont.dispose();
         if (uiStage != null) uiStage.dispose();
         if (catchUiStage != null) catchUiStage.dispose();
         super.dispose();

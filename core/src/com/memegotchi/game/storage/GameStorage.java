@@ -14,6 +14,9 @@ public class GameStorage {
     private static final String KEY_LAST_SAVE = "lastSaveTime";
     private static final String KEY_MUSIC_ON = "musicOn";
     private static final String KEY_SOUND_ON = "soundOn";
+    private static final String KEY_FISH_COUNT = "fishCount";
+    private static final String KEY_FISH_PREFIX = "fish_";
+    private static final String KEY_SHAMPOO = "shampoo";
 
     public boolean isMusicOn() { return prefs.getBoolean(KEY_MUSIC_ON, true); }
     public boolean isSoundOn() { return prefs.getBoolean(KEY_SOUND_ON, true); }
@@ -33,6 +36,12 @@ public class GameStorage {
         prefs.putInteger(KEY_CLEANLINESS, pet.getCleanliness());
         prefs.putInteger(KEY_COINS, pet.getCoins());
         prefs.putLong(KEY_LAST_SAVE, System.currentTimeMillis());
+        java.util.List<String> fishList = pet.getFishInventory();
+        prefs.putInteger(KEY_FISH_COUNT, fishList.size());
+        for (int i = 0; i < fishList.size(); i++) {
+            prefs.putString(KEY_FISH_PREFIX + i, fishList.get(i));
+        }
+        prefs.putInteger(KEY_SHAMPOO, pet.getShampooCount());
         prefs.flush();
     }
 
@@ -49,6 +58,13 @@ public class GameStorage {
         pet.setCleanliness(prefs.getInteger(KEY_CLEANLINESS, 100));
         pet.setCoins(prefs.getInteger(KEY_COINS, 100));
         pet.setLastUpdateTime(prefs.getLong(KEY_LAST_SAVE, System.currentTimeMillis()));
+        int fishCount = prefs.getInteger(KEY_FISH_COUNT, 0);
+        java.util.ArrayList<String> fishList = new java.util.ArrayList<>();
+        for (int i = 0; i < fishCount; i++) {
+            fishList.add(prefs.getString(KEY_FISH_PREFIX + i, ""));
+        }
+        pet.setFishInventory(fishList);
+        pet.setShampooCount(prefs.getInteger(KEY_SHAMPOO, 0));
         return pet;
     }
 }

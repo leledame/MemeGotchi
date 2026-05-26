@@ -1,5 +1,7 @@
 package com.memegotchi.game.buttons;
 
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
@@ -16,6 +18,8 @@ public class Button {
     protected String text;
     protected BitmapFont font;
     protected GlyphLayout layout = new GlyphLayout();
+    protected Color backgroundColor;
+    private static Texture whitePixel;
 
     // Конструктор 1: только координаты и размер
     public Button(int x, int y, int width, int height) {
@@ -76,6 +80,10 @@ public class Button {
         this.selectedTexture = selectedTexture;
     }
 
+    public void setBackgroundColor(Color color) {
+        this.backgroundColor = color;
+    }
+
     public void setText(String text, BitmapFont font) {
         this.text = text;
         this.font = font;
@@ -83,6 +91,19 @@ public class Button {
 
     public void render(SpriteBatch batch, boolean isSelected) {
         if (!available) return;
+
+        if (backgroundColor != null) {
+            if (whitePixel == null) {
+                Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+                pixmap.setColor(Color.WHITE);
+                pixmap.fill();
+                whitePixel = new Texture(pixmap);
+                pixmap.dispose();
+            }
+            batch.setColor(backgroundColor);
+            batch.draw(whitePixel, x, y, width, height);
+            batch.setColor(Color.WHITE);
+        }
 
         Texture renderTexture = isSelected ? selectedTexture : texture;
         if (renderTexture != null) {
@@ -141,5 +162,9 @@ public class Button {
     public void dispose() {
         if (texture != null) texture.dispose();
         if (selectedTexture != null && selectedTexture != texture) selectedTexture.dispose();
+        if (whitePixel != null) {
+            whitePixel.dispose();
+            whitePixel = null;
+        }
     }
 }
