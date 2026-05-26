@@ -22,18 +22,20 @@ import com.memegotchi.game.engine.PetEngine;
 
 public class FishingScreen extends BaseScreen {
     private static final float SIZE_MULTIPLIER = 5.0f;
-    // Удалена некорректная переменная scale (используется родительская)
-
     public enum FishPattern { NORMAL, FAST, VERY_FAST }
 
+    // ДОБАВЛЕНО: Поле name для названия рыбы
     public class FishData {
         public Texture texture;
         public FishPattern pattern;
         public int price;
-        public FishData(Texture texture, FishPattern pattern, int price) {
+        public String name;
+
+        public FishData(Texture texture, FishPattern pattern, int price, String name) {
             this.texture = texture;
             this.pattern = pattern;
             this.price = price;
+            this.name = name;
         }
     }
 
@@ -109,9 +111,10 @@ public class FishingScreen extends BaseScreen {
         fishStartMoveY = 0f;
         currentMoveTime = 0f;
 
-        // Шрифт с чёрным цветом для контраста
+        // Шрифт с чёрным цветом для контраста.
+        // ИЗМЕНЕНО: Масштаб увеличен с 3.5f до 4.0f, чтобы текст казался крупнее (имитация жирности).
         buttonFont = new BitmapFont();
-        buttonFont.getData().setScale(3.5f);
+        buttonFont.getData().setScale(4.0f);
         buttonFont.setColor(Color.BLACK);
 
         gameFishingBackgroundTexture = new Texture("backgronds/fishing/gamefish.png");
@@ -121,6 +124,13 @@ public class FishingScreen extends BaseScreen {
         gameFishingBackgroundTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
         fishTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
         greenZoneTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+
+        // ДОБАВЛЕНО: Массив с названиями рыб
+        String[] fishNames = {
+                "Stone Fish", "Bread fish", "Herring",
+                "Sky Fish", "Purple Blowfish", "Plush Fish",
+                "Royal Fish", "Shadow Fish", "Ruby Fish"
+        };
 
         for (int i = 0; i < 9; i++) {
             Texture tex = new Texture("backgronds/fishing/fishes/fish_" + (i + 1) + ".png");
@@ -137,14 +147,14 @@ public class FishingScreen extends BaseScreen {
                 pattern = FishPattern.VERY_FAST;
                 price = MathUtils.random(50, 100);
             }
-            fishes[i] = new FishData(tex, pattern, price);
+            // ИЗМЕНЕНО: Передаем имя рыбы из массива
+            fishes[i] = new FishData(tex, pattern, price, fishNames[i]);
         }
         currentFish = fishes[MathUtils.random(0, 8)];
 
         setupUI();
         calculateLayout();
 
-        // Восстанавливаем inputProcessor после возврата на экран
         if (uiStage != null) {
             Gdx.input.setInputProcessor(uiStage);
         }
@@ -161,14 +171,13 @@ public class FishingScreen extends BaseScreen {
             // Если текстуры нет, кнопка будет просто текстом
         }
         btnStyle.font = buttonFont;
-        btnStyle.fontColor = Color.BLACK; // явный цвет текста
+        btnStyle.fontColor = Color.BLACK;
 
-        // Кнопка START
         startGameButton = new TextButton("START", btnStyle);
         startGameButton.setSize(280, 90);
         float btnX = (GameResources.SCREEN_WIDTH - startGameButton.getWidth()) / 2f;
         startGameButton.setPosition(btnX, 400);
-        startGameButton.setVisible(true); // гарантия видимости
+        startGameButton.setVisible(true);
 
         startGameButton.addListener(new ClickListener() {
             @Override
@@ -184,7 +193,6 @@ public class FishingScreen extends BaseScreen {
             }
         });
 
-        // Stage для UI
         if (screenManager instanceof MemeGotchi) {
             MemeGotchi game = (MemeGotchi) screenManager;
             uiStage = new Stage(new com.badlogic.gdx.utils.viewport.FitViewport(
@@ -197,9 +205,8 @@ public class FishingScreen extends BaseScreen {
         }
         uiStage.addActor(startGameButton);
 
-        // Окно поимки рыбы
         Label.LabelStyle labelStyle = new Label.LabelStyle(buttonFont, Color.WHITE);
-        catchMessageLabel = new Label("FISH CAUGHT!", labelStyle);
+        catchMessageLabel = new Label("", labelStyle);
         catchMessageLabel.setAlignment(Align.center);
         catchMessageLabel.setPosition(0, 600);
         catchMessageLabel.setSize(GameResources.SCREEN_WIDTH, 100);
@@ -248,7 +255,6 @@ public class FishingScreen extends BaseScreen {
             return;
         }
 
-        // Показываем кнопку START всегда, когда игра не началась
         if (!isFishingStarted && uiStage != null) {
             uiStage.act(delta);
             uiStage.draw();
@@ -310,7 +316,10 @@ public class FishingScreen extends BaseScreen {
             isFishingStarted = false;
             isCatchScreenOpen = true;
             caughtFishImage.setDrawable(new TextureRegionDrawable(new TextureRegion(currentFish.texture)));
-            catchMessageLabel.setText("YOU CAUGHT A FISH!\nPRICE: " + currentFish.price + " COINS");
+
+            // ИЗМЕНЕНО: Выводим название пойманной рыбы (в верхнем регистре) вместо "YOU CAUGHT A FISH!"
+            catchMessageLabel.setText(currentFish.name.toUpperCase() + " CAUGHT!\nPRICE: " + currentFish.price + " COINS");
+
             Gdx.input.setInputProcessor(catchUiStage);
         }
     }
