@@ -17,6 +17,8 @@ public class GameStorage {
     private static final String KEY_FISH_COUNT = "fishCount";
     private static final String KEY_FISH_PREFIX = "fish_";
     private static final String KEY_SHAMPOO = "shampoo";
+    private static final String KEY_VERSION = "schemaVersion";
+    private static final int CURRENT_VERSION = 1;
 
     public boolean isMusicOn() { return prefs.getBoolean(KEY_MUSIC_ON, true); }
     public boolean isSoundOn() { return prefs.getBoolean(KEY_SOUND_ON, true); }
@@ -27,6 +29,20 @@ public class GameStorage {
 
     public GameStorage() {
         prefs = Gdx.app.getPreferences(PREFS_NAME);
+        migrate();
+    }
+
+    private void migrate() {
+        int version = prefs.getInteger(KEY_VERSION, 0);
+        if (version < CURRENT_VERSION) {
+            boolean musicOn = prefs.getBoolean(KEY_MUSIC_ON, true);
+            boolean soundOn = prefs.getBoolean(KEY_SOUND_ON, true);
+            prefs.clear();
+            prefs.putBoolean(KEY_MUSIC_ON, musicOn);
+            prefs.putBoolean(KEY_SOUND_ON, soundOn);
+            prefs.putInteger(KEY_VERSION, CURRENT_VERSION);
+            prefs.flush();
+        }
     }
 
     public void save(PetModel pet) {
