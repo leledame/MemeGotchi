@@ -5,6 +5,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.memegotchi.game.buttons.BottomPanelButton.LocationType;
 import com.memegotchi.game.engine.PetEngine;
@@ -53,7 +54,7 @@ public class MemeGotchi extends Game implements ScreenManager {
     public void create() {
         batch = new SpriteBatch();
         camera = new OrthographicCamera();
-        viewport = new FitViewport(GameResources.SCREEN_WIDTH, GameResources.SCREEN_HEIGHT, camera);
+        viewport = new StretchViewport(GameResources.SCREEN_WIDTH, GameResources.SCREEN_HEIGHT, camera);
         camera.position.set(GameResources.SCREEN_WIDTH / 2f, GameResources.SCREEN_HEIGHT / 2f, 0);
         camera.update();
 
