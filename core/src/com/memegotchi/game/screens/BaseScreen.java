@@ -102,7 +102,7 @@ public abstract class BaseScreen extends ScreenAdapter {
         statsFont = FontBuilder.generate(30, Color.WHITE, "fonts/segoe-ui-emoji_0.ttf");
         coinsFont = FontBuilder.generate(30, Color.WHITE, "fonts/segoe-ui-emoji_0.ttf");
         messageFont = FontBuilder.generate(22, Color.PINK, "fonts/segoe-ui-emoji_0.ttf");
-        moveFont = FontBuilder.generate(30, Color.WHITE, "fonts/segoe-ui-emoji_0.ttf");
+        moveFont = FontBuilder.generate(39, Color.WHITE, "fonts/segoe-ui-emoji_0.ttf");
         int moveBtnW = 240;
         int moveBtnH = 90;
         int moveBtnX = (WORLD_WIDTH - moveBtnW) / 2;

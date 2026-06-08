@@ -28,7 +28,7 @@ public class StartScreen extends ScreenAdapter {
         background = new Texture(GameResources.START);
         background.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
 
-        buttonFont = FontBuilder.generate(36, Color.WHITE, "fonts/segoe-ui-emoji_0.ttf");
+        buttonFont = FontBuilder.generate(42, Color.WHITE, "fonts/segoe-ui-emoji_0.ttf");
         titleFont = FontBuilder.generate(50, Color.PINK, "fonts/segoe-ui-emoji_0.ttf");
 
 
