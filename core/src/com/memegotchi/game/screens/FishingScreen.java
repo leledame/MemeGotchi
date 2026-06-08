@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
@@ -24,6 +25,9 @@ import com.memegotchi.game.engine.PetEngine;
 
 public class FishingScreen extends BaseScreen {
     private static final float SIZE_MULTIPLIER = 5.0f;
+
+    private float mgX, mgY, mgDrawWidth, mgDrawHeight;
+
     public enum FishPattern { NORMAL, FAST, VERY_FAST }
 
     public class FishData {
@@ -82,6 +86,7 @@ public class FishingScreen extends BaseScreen {
     private BitmapFont buttonFont;
     private BitmapFont catchFont;
     private BitmapFont catchMessageFont;
+    private Vector3 touchCoords = new Vector3();
 
     public FishingScreen(PetEngine petEngine) {
         super(petEngine);
@@ -303,11 +308,6 @@ public class FishingScreen extends BaseScreen {
         updateZonePhysics();
 
         float baseScale = scale * SIZE_MULTIPLIER;
-        float mgDrawWidth = gameFishingBackgroundTexture.getWidth() * baseScale;
-        float mgDrawHeight = gameFishingBackgroundTexture.getHeight() * baseScale;
-        float mgX = (GameResources.SCREEN_WIDTH - mgDrawWidth) / 2f;
-        float mgY = (GameResources.SCREEN_HEIGHT - mgDrawHeight) / 2f;
-
         batch.begin();
         batch.draw(gameFishingBackgroundTexture, mgX, mgY, mgDrawWidth, mgDrawHeight);
 
@@ -367,10 +367,19 @@ public class FishingScreen extends BaseScreen {
         }
     }
 
+    private boolean isTouchingGameArea() {
+        if (!Gdx.input.isTouched()) return false;
+        if (!(screenManager instanceof MemeGotchi)) return true;
+        touchCoords.set(Gdx.input.getX(), Gdx.input.getY(), 0);
+        BaseScreen.screenToWorld((MemeGotchi) screenManager, touchCoords);
+        return touchCoords.x >= mgX && touchCoords.x <= mgX + mgDrawWidth &&
+               touchCoords.y >= mgY && touchCoords.y <= mgY + mgDrawHeight;
+    }
+
     private void updateZonePhysics() {
         if (isFishingStarted) {
             float dt = Gdx.graphics.getDeltaTime();
-            if (Gdx.input.isTouched()) {
+            if (isTouchingGameArea()) {
                 zoneSpeed += (ZONE_SPEED_UP - ZONE_GRAVITY) * dt;
             } else {
                 zoneSpeed -= ZONE_GRAVITY * dt;
@@ -389,10 +398,10 @@ public class FishingScreen extends BaseScreen {
 
     private void calculateLayout() {
         float baseScale = scale * SIZE_MULTIPLIER;
-        float mgDrawWidth = gameFishingBackgroundTexture.getWidth() * baseScale;
-        float mgDrawHeight = gameFishingBackgroundTexture.getHeight() * baseScale;
-        float mgX = (GameResources.SCREEN_WIDTH - mgDrawWidth) / 2f;
-        float mgY = (GameResources.SCREEN_HEIGHT - mgDrawHeight) / 2f;
+        mgDrawWidth = gameFishingBackgroundTexture.getWidth() * baseScale;
+        mgDrawHeight = gameFishingBackgroundTexture.getHeight() * baseScale;
+        mgX = (GameResources.SCREEN_WIDTH - mgDrawWidth) / 2f;
+        mgY = (GameResources.SCREEN_HEIGHT - mgDrawHeight) / 2f;
 
         columnWidth = mgDrawWidth / 3.0f;
         firstColumnCenterX = mgX + columnWidth + columnWidth * 0.4f - 32f;
