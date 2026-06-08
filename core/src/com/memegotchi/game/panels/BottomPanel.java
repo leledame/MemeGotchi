@@ -8,7 +8,7 @@ import com.memegotchi.game.buttons.BottomPanelButton;
 public class BottomPanel extends Panel {
     private static final int BUTTON_COUNT = 5;
     private static final float BORDER_SCALE = 18f;
-    private static final float KITCHEN_SCALE = 1.50f;
+    private static final float WALK_SCALE = 1.50f;
 
     private BottomPanelButton[] buttons;
     private int activeButtonIndex = 0;
@@ -41,7 +41,7 @@ public class BottomPanel extends Panel {
         for (int i = 0; i < BUTTON_COUNT; i++) {
             int buttonX = i * slotWidth + (slotWidth - buttonSize) / 2;
             if (locations[i] == BottomPanelButton.LocationType.TOILET) buttonX += 30;
-            if (locations[i] == BottomPanelButton.LocationType.KITCHEN) buttonX += 10;
+            if (locations[i] == BottomPanelButton.LocationType.WALK) buttonX += 10;
             buttons[i] = new BottomPanelButton(buttonX, buttonY, buttonSize, buttonSize, locations[i]);
             buttons[i].loadTextures();
         }
@@ -67,7 +67,7 @@ public class BottomPanel extends Panel {
         batch.begin();
         for (int i = 0; i < buttons.length; i++) {
             if (buttons[i] == null) continue;
-            if (buttons[i].getLocation() == BottomPanelButton.LocationType.KITCHEN) {
+            if (buttons[i].getLocation() == BottomPanelButton.LocationType.WALK) {
                 renderScaledButton(batch, buttons[i], i == activeButtonIndex);
             } else {
                 buttons[i].render(batch, i == activeButtonIndex);
@@ -80,8 +80,8 @@ public class BottomPanel extends Panel {
         Texture renderTexture = isSelected ? button.getSelectedTexture() : button.getTexture();
         if (renderTexture == null) return;
 
-        int scaledWidth = (int) (button.getWidth() * KITCHEN_SCALE);
-        int scaledHeight = (int) (button.getHeight() * KITCHEN_SCALE);
+        int scaledWidth = (int) (button.getWidth() * WALK_SCALE);
+        int scaledHeight = (int) (button.getHeight() * WALK_SCALE);
         int offsetX = (button.getWidth() - scaledWidth) / 2;
         int offsetY = (button.getHeight() - scaledHeight) / 2;
 
@@ -92,9 +92,9 @@ public class BottomPanel extends Panel {
         for (int i = 0; i < buttons.length; i++) {
             if (buttons[i] == null || !buttons[i].isAvailable()) continue;
 
-            if (buttons[i].getLocation() == BottomPanelButton.LocationType.KITCHEN) {
-                int scaledWidth = (int) (buttons[i].getWidth() * KITCHEN_SCALE);
-                int scaledHeight = (int) (buttons[i].getHeight() * KITCHEN_SCALE);
+            if (buttons[i].getLocation() == BottomPanelButton.LocationType.WALK) {
+                int scaledWidth = (int) (buttons[i].getWidth() * WALK_SCALE);
+                int scaledHeight = (int) (buttons[i].getHeight() * WALK_SCALE);
                 int offsetX = (buttons[i].getWidth() - scaledWidth) / 2;
                 int offsetY = (buttons[i].getHeight() - scaledHeight) / 2;
                 int hitX = buttons[i].getX() + offsetX;
