@@ -18,6 +18,9 @@ out/
 *.apk
 *.exe
 
+# archives
+*.zip
+
 # local
 local.properties
 *.log

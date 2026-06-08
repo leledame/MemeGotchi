@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.memegotchi.game.FontBuilder;
 import com.memegotchi.game.GameResources;
 import com.memegotchi.game.MemeGotchi;
 import com.memegotchi.game.buttons.BottomPanelButton;
@@ -98,22 +99,10 @@ public abstract class BaseScreen extends ScreenAdapter {
         bottomPanel = new BottomPanel(WORLD_WIDTH, WORLD_HEIGHT, 1f);
         topPanel = new TopPanel(WORLD_WIDTH, WORLD_HEIGHT, 1f, this, screenManager);
 
-        statsFont = new BitmapFont();
-        statsFont.getData().setScale(2.0f);
-        statsFont.getRegion().getTexture().setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
-
-        coinsFont = new BitmapFont();
-        coinsFont.getData().setScale(2.0f);
-        coinsFont.getRegion().getTexture().setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
-
-        messageFont = new BitmapFont();
-        messageFont.setColor(Color.PINK);
-        messageFont.getData().setScale(1.5f);
-        messageFont.getRegion().getTexture().setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
-
-        moveFont = new BitmapFont();
-        moveFont.getData().setScale(2.0f);
-        moveFont.getRegion().getTexture().setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        statsFont = FontBuilder.generate(30, Color.WHITE, "fonts/segoe-ui-emoji_0.ttf");
+        coinsFont = FontBuilder.generate(30, Color.WHITE, "fonts/segoe-ui-emoji_0.ttf");
+        messageFont = FontBuilder.generate(22, Color.PINK, "fonts/segoe-ui-emoji_0.ttf");
+        moveFont = FontBuilder.generate(30, Color.WHITE, "fonts/segoe-ui-emoji_0.ttf");
         int moveBtnW = 240;
         int moveBtnH = 90;
         int moveBtnX = (WORLD_WIDTH - moveBtnW) / 2;
@@ -136,7 +125,7 @@ public abstract class BaseScreen extends ScreenAdapter {
             currentCharacterTexture = sleepyTexture;
         } else if (pet.getHunger() <= 20 || pet.getCleanliness() <= 20) {
             currentCharacterTexture = sadTexture;
-        } else if (pet.getHappiness() >= 80) {
+        } else if (pet.getHappiness() > 80 && pet.getEnergy() > 80 && pet.getHunger() > 80 && pet.getCleanliness() > 80) {
             currentCharacterTexture = happyTexture;
         } else {
             currentCharacterTexture = baseTexture;

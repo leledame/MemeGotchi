@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.memegotchi.game.FontBuilder;
 import com.memegotchi.game.GameResources;
 import com.memegotchi.game.MemeGotchi;
 import com.memegotchi.game.buttons.Button;
@@ -31,13 +32,8 @@ public class SettingsScreen extends BaseScreen {
     public void show() {
         super.show();
 
-        buttonFont = new BitmapFont();
-        buttonFont.getData().setScale(3.0f);
-        buttonFont.getRegion().getTexture().setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
-
-        titleFont = new BitmapFont();
-        titleFont.getData().setScale(3.0f);
-        titleFont.getRegion().getTexture().setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        titleFont = FontBuilder.generate(45, Color.WHITE, "fonts/segoe-ui-emoji_0.ttf");
+        buttonFont = FontBuilder.generate(45, Color.WHITE, "fonts/segoe-ui-emoji_0.ttf");
 
         com.memegotchi.game.storage.GameStorage storage = new com.memegotchi.game.storage.GameStorage();
         musicOn = storage.isMusicOn();

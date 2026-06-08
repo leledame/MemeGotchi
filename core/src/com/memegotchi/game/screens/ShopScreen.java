@@ -7,7 +7,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.ScreenUtils;
-import com.badlogic.gdx.utils.viewport.Viewport;
+import com.memegotchi.game.FontBuilder;
 import com.memegotchi.game.GameResources;
 import com.memegotchi.game.MemeGotchi;
 import com.memegotchi.game.buttons.Button;
@@ -31,17 +31,9 @@ public class ShopScreen extends BaseScreen {
     public void show() {
         super.show();
 
-        buttonFont = new BitmapFont();
-        buttonFont.getData().setScale(3.0f);
-        buttonFont.getRegion().getTexture().setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
-
-        titleFont = new BitmapFont();
-        titleFont.getData().setScale(3.0f);
-        titleFont.getRegion().getTexture().setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
-
-        priceFont = new BitmapFont();
-        priceFont.getData().setScale(1.8f);
-        priceFont.getRegion().getTexture().setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        titleFont = FontBuilder.generate(52, Color.WHITE, "fonts/segoe-ui-emoji_0.ttf");
+        priceFont = FontBuilder.generate(28, Color.WHITE, "fonts/segoe-ui-emoji_0.ttf");
+        buttonFont = FontBuilder.generate(40, Color.WHITE, "fonts/segoe-ui-emoji_0.ttf");
 
         int buttonWidth = 500;
         int buttonHeight = 90;
@@ -73,9 +65,16 @@ public class ShopScreen extends BaseScreen {
 
         titleFont.setColor(Color.GOLD);
         layout.setText(titleFont, "SHOP");
-        titleFont.draw(batch, "SHOP", (GameResources.SCREEN_WIDTH - layout.width) / 2f, GameResources.SCREEN_HEIGHT - 130);
+        float shopY = GameResources.SCREEN_HEIGHT - 130;
+        titleFont.draw(batch, "SHOP", (GameResources.SCREEN_WIDTH - layout.width) / 2f, shopY);
+        float shopBottomY = shopY - layout.height;
+
+        float buttonTopY = (GameResources.SCREEN_HEIGHT - 300) + 90;
+        float gapCenterY = (shopBottomY + buttonTopY) / 2f;
+        layout.setText(priceFont, petEngine.getPet().getCoins() + " coins");
+        float coinsY = gapCenterY - (priceFont.getAscent() + priceFont.getDescent()) / 2f;
         priceFont.draw(batch, petEngine.getPet().getCoins() + " coins",
-                (GameResources.SCREEN_WIDTH - layout.width) / 2f, GameResources.SCREEN_HEIGHT - 170);
+                (GameResources.SCREEN_WIDTH - layout.width) / 2f, coinsY);
 
         buyFoodButton.render(batch, false);
         buyCleanButton.render(batch, false);

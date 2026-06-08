@@ -17,6 +17,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
+import com.memegotchi.game.FontBuilder;
 import com.memegotchi.game.GameResources;
 import com.memegotchi.game.MemeGotchi;
 import com.memegotchi.game.engine.PetEngine;
@@ -127,14 +128,8 @@ public class FishingScreen extends BaseScreen {
         fishStartMoveY = 0f;
         currentMoveTime = 0f;
 
-        buttonFont = new BitmapFont();
-        buttonFont.getData().setScale(3.5f);
-        buttonFont.getRegion().getTexture().setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
-
-        catchFont = new BitmapFont();
-        catchFont.getData().setScale(4.0f);
-        catchFont.setColor(Color.WHITE);
-        catchFont.getRegion().getTexture().setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        buttonFont = FontBuilder.generate(52, Color.WHITE, "fonts/segoe-ui-emoji_0.ttf");
+        catchFont = FontBuilder.generate(60, Color.WHITE, "fonts/segoe-ui-emoji_0.ttf");
 
         gameFishingBackgroundTexture = new Texture("backgronds/fishing/gamefish.png");
         fishTexture = new Texture("backgronds/fishing/fish_for_game.png");
