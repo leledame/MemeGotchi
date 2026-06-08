@@ -42,6 +42,7 @@ public class BottomPanel extends Panel {
             int buttonX = i * slotWidth + (slotWidth - buttonSize) / 2;
             if (locations[i] == BottomPanelButton.LocationType.TOILET) buttonX += 30;
             if (locations[i] == BottomPanelButton.LocationType.WALK) buttonX += 10;
+            if (locations[i] == BottomPanelButton.LocationType.KITCHEN) buttonX += (int)(screenWidth * 0.035f);
             buttons[i] = new BottomPanelButton(buttonX, buttonY, buttonSize, buttonSize, locations[i]);
             buttons[i].loadTextures();
         }
