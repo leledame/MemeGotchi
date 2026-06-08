@@ -79,6 +79,27 @@ public class SoundManager {
 
     public void setSoundEnabled(boolean enabled) {
         soundEnabled = enabled;
+        if (isSleeping) {
+            if (enabled) {
+                if (sleepingCatSound != null && sleepingSoundId < 0) {
+                    sleepingSoundId = sleepingCatSound.play(0.5f);
+                    sleepingCatSound.setLooping(sleepingSoundId, true);
+                }
+                if (nightSound != null && nightSoundId < 0) {
+                    nightSoundId = nightSound.play(0.3f);
+                    nightSound.setLooping(nightSoundId, true);
+                }
+            } else {
+                if (sleepingSoundId >= 0 && sleepingCatSound != null) {
+                    sleepingCatSound.stop(sleepingSoundId);
+                    sleepingSoundId = -1;
+                }
+                if (nightSoundId >= 0 && nightSound != null) {
+                    nightSound.stop(nightSoundId);
+                    nightSoundId = -1;
+                }
+            }
+        }
     }
 
     public boolean isSoundEnabled() {
