@@ -38,9 +38,10 @@ public class ShopScreen extends BaseScreen {
         int buttonWidth = 500;
         int buttonHeight = 90;
         int centerX = (GameResources.SCREEN_WIDTH - buttonWidth) / 2;
-        int startY = GameResources.SCREEN_HEIGHT - 300;
+        int downOffset = (int)(GameResources.SCREEN_HEIGHT * 0.01f);
+        int startY = GameResources.SCREEN_HEIGHT - 300 - downOffset;
 
-        backButton = new Button(25, GameResources.SCREEN_HEIGHT - 110, 280, 90, buttonFont, GameResources.BUTTON_TEXT, "BACK");
+        backButton = new Button(25, GameResources.SCREEN_HEIGHT - 110 - downOffset, 280, 90, buttonFont, GameResources.BUTTON_TEXT, "BACK");
         buyFoodButton = new Button(centerX, startY, buttonWidth, buttonHeight, buttonFont, GameResources.BUTTON_TEXT, "Food (5$)");
         buyCleanButton = new Button(centerX, startY - 100, buttonWidth, buttonHeight, buttonFont, GameResources.BUTTON_TEXT, "Shampoo (15$)");
         buyEnergyButton = new Button(centerX, startY - 200, buttonWidth, buttonHeight, buttonFont, GameResources.BUTTON_TEXT, "Energy Potion (15$)");
@@ -63,13 +64,14 @@ public class ShopScreen extends BaseScreen {
 
         GlyphLayout layout = new GlyphLayout();
 
+        int downOffset = (int)(GameResources.SCREEN_HEIGHT * 0.01f);
         titleFont.setColor(Color.GOLD);
         layout.setText(titleFont, "SHOP");
-        float shopY = GameResources.SCREEN_HEIGHT - 130;
+        float shopY = GameResources.SCREEN_HEIGHT - 130 - downOffset;
         titleFont.draw(batch, "SHOP", (GameResources.SCREEN_WIDTH - layout.width) / 2f, shopY);
         float shopBottomY = shopY - layout.height;
 
-        float buttonTopY = (GameResources.SCREEN_HEIGHT - 300) + 90;
+        float buttonTopY = (GameResources.SCREEN_HEIGHT - 300 - downOffset) + 90;
         float gapCenterY = (shopBottomY + buttonTopY) / 2f;
         layout.setText(priceFont, petEngine.getPet().getCoins() + " coins");
         float coinsY = gapCenterY - (priceFont.getAscent() + priceFont.getDescent()) / 2f;

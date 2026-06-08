@@ -1,6 +1,5 @@
 package com.memegotchi.game.panels;
 
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.memegotchi.game.buttons.BottomPanelButton;
@@ -8,7 +7,6 @@ import com.memegotchi.game.buttons.BottomPanelButton;
 public class BottomPanel extends Panel {
     private static final int BUTTON_COUNT = 5;
     private static final float BORDER_SCALE = 18f;
-    private static final float WALK_SCALE = 1.50f;
 
     private BottomPanelButton[] buttons;
     private int activeButtonIndex = 0;
@@ -36,13 +34,10 @@ public class BottomPanel extends Panel {
 
         int buttonSize = (int) (panelHeight *   0.6f);
         int slotWidth = screenWidth / BUTTON_COUNT;
-        int buttonY = panelY + (panelHeight - buttonSize) / 2;
+        int buttonY = panelY + (int)((panelHeight - buttonSize) * 0.4f);
 
         for (int i = 0; i < BUTTON_COUNT; i++) {
             int buttonX = i * slotWidth + (slotWidth - buttonSize) / 2;
-            if (locations[i] == BottomPanelButton.LocationType.TOILET) buttonX += 30;
-            if (locations[i] == BottomPanelButton.LocationType.WALK) buttonX += 10;
-            if (locations[i] == BottomPanelButton.LocationType.KITCHEN) buttonX += (int)(screenWidth * 0.035f);
             buttons[i] = new BottomPanelButton(buttonX, buttonY, buttonSize, buttonSize, locations[i]);
             buttons[i].loadTextures();
         }
@@ -68,45 +63,15 @@ public class BottomPanel extends Panel {
         batch.begin();
         for (int i = 0; i < buttons.length; i++) {
             if (buttons[i] == null) continue;
-            if (buttons[i].getLocation() == BottomPanelButton.LocationType.WALK) {
-                renderScaledButton(batch, buttons[i], i == activeButtonIndex);
-            } else {
-                buttons[i].render(batch, i == activeButtonIndex);
-            }
+            buttons[i].render(batch, i == activeButtonIndex);
         }
         batch.end();
-    }
-
-    private void renderScaledButton(SpriteBatch batch, BottomPanelButton button, boolean isSelected) {
-        Texture renderTexture = isSelected ? button.getSelectedTexture() : button.getTexture();
-        if (renderTexture == null) return;
-
-        int scaledWidth = (int) (button.getWidth() * WALK_SCALE);
-        int scaledHeight = (int) (button.getHeight() * WALK_SCALE);
-        int offsetX = (button.getWidth() - scaledWidth) / 2;
-        int offsetY = (button.getHeight() - scaledHeight) / 2;
-
-        batch.draw(renderTexture, button.getX() + offsetX, button.getY() + offsetY, scaledWidth, scaledHeight);
     }
 
     public boolean handleTouch(int touchX, int touchY) {
         for (int i = 0; i < buttons.length; i++) {
             if (buttons[i] == null || !buttons[i].isAvailable()) continue;
-
-            if (buttons[i].getLocation() == BottomPanelButton.LocationType.WALK) {
-                int scaledWidth = (int) (buttons[i].getWidth() * WALK_SCALE);
-                int scaledHeight = (int) (buttons[i].getHeight() * WALK_SCALE);
-                int offsetX = (buttons[i].getWidth() - scaledWidth) / 2;
-                int offsetY = (buttons[i].getHeight() - scaledHeight) / 2;
-                int hitX = buttons[i].getX() + offsetX;
-                int hitY = buttons[i].getY() + offsetY;
-
-                if (touchX >= hitX && touchX <= hitX + scaledWidth &&
-                        touchY >= hitY && touchY <= hitY + scaledHeight) {
-                    setActiveButton(i);
-                    return true;
-                }
-            } else if (buttons[i].contains(touchX, touchY)) {
+            if (buttons[i].contains(touchX, touchY)) {
                 setActiveButton(i);
                 return true;
             }
