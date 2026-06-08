@@ -43,8 +43,8 @@ public class BathroomScreen extends BaseScreen {
     @Override
     protected void onScreenShow() {
         super.onScreenShow();
-        int btnW = 300;
-        int btnH = 120;
+        int btnW = 200;
+        int btnH = 80;
         int btnX = (WORLD_WIDTH - btnW) / 2 - (int) (WORLD_WIDTH * 0.01f);
         int btnY = (int) (WORLD_HEIGHT * 0.40f);
         washButton = new Button(btnX, btnY, btnW, btnH, moveFont, GameResources.BUTTON_TEXT, "Wash");
