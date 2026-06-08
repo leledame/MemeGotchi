@@ -81,6 +81,7 @@ public class FishingScreen extends BaseScreen {
 
     private BitmapFont buttonFont;
     private BitmapFont catchFont;
+    private BitmapFont catchMessageFont;
 
     public FishingScreen(PetEngine petEngine) {
         super(petEngine);
@@ -130,6 +131,7 @@ public class FishingScreen extends BaseScreen {
 
         buttonFont = FontBuilder.generate(52, Color.WHITE, "fonts/segoe-ui-emoji_0.ttf");
         catchFont = FontBuilder.generate(60, Color.WHITE, "fonts/segoe-ui-emoji_0.ttf");
+        catchMessageFont = FontBuilder.generate(60, Color.WHITE, "fonts/segoe-ui-emoji_0.ttf", 3f, Color.BLACK);
 
         gameFishingBackgroundTexture = new Texture("backgronds/fishing/gamefish.png");
         fishTexture = new Texture("backgronds/fishing/fish_for_game.png");
@@ -223,7 +225,7 @@ public class FishingScreen extends BaseScreen {
         }
         uiStage.addActor(startGameButton);
 
-        Label.LabelStyle labelStyle = new Label.LabelStyle(catchFont, Color.WHITE);
+        Label.LabelStyle labelStyle = new Label.LabelStyle(catchMessageFont, Color.WHITE);
         catchMessageLabel = new Label("", labelStyle);
         catchMessageLabel.setAlignment(Align.center);
         catchMessageLabel.setPosition(0, 600);
@@ -446,6 +448,7 @@ public class FishingScreen extends BaseScreen {
         }
         if (buttonFont != null) buttonFont.dispose();
         if (catchFont != null) catchFont.dispose();
+        if (catchMessageFont != null) catchMessageFont.dispose();
         if (uiStage != null) uiStage.dispose();
         if (catchUiStage != null) catchUiStage.dispose();
         super.dispose();

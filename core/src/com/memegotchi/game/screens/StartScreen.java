@@ -32,9 +32,9 @@ public class StartScreen extends ScreenAdapter {
         titleFont = FontBuilder.generate(50, Color.PINK, "fonts/segoe-ui-emoji_0.ttf");
 
 
-        int centerX = (GameResources.SCREEN_WIDTH - 400) / 2;
+        int centerX = (GameResources.SCREEN_WIDTH - 600) / 2;
 
-        startButton = new Button(centerX, 600, 400, 120, buttonFont, GameResources.BUTTON_TEXT, "START");
+        startButton = new Button(centerX, 600, 600, 180, buttonFont, GameResources.BUTTON_TEXT, "START");
         startButton.getTexture().setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
     }
 
